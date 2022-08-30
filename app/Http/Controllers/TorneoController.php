@@ -18,6 +18,13 @@ class TorneoController extends Controller
         return response()->json($torneo);
     }
 
+    public function getTorneosOrganizador($organizador)
+    {
+        $organizador_id = User::where('email', $organizador)->first()->id;
+        $torneos = Torneo::where('organizador_id', $organizador_id)->get();
+        return response()->json($torneos);
+    }
+
     public function store(Request $request)
     {
         $organizador_id = User::where('email', $request->organizador)->first()->id;
