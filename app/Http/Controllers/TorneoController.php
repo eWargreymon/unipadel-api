@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Torneo;
+use App\Models\User;
 
 class TorneoController extends Controller
 {
@@ -19,8 +20,9 @@ class TorneoController extends Controller
 
     public function store(Request $request)
     {
+        $organizador_id = User::where('email', $request->organizador)->first()->id;
+        
         $torneo = new Torneo();
-
         $torneo->nombre = $request->nombre;
         $torneo->fecha_inicio = date('Y-m-d', strtotime($request->fecha_inicio));
         $torneo->fecha_fin = date('Y-m-d', strtotime($request->fecha_fin));
@@ -32,8 +34,7 @@ class TorneoController extends Controller
         $torneo->precio = $request->precio;
         $torneo->descripcion = $request->descripcion;
         $torneo->activo = $request->activo;
-
-        // dd($torneo);
+        $torneo->organizador_id = $organizador_id;
 
         if ($torneo->save()) {
             return response()->json([

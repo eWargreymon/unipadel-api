@@ -28,6 +28,8 @@ class CreateTorneosTable extends Migration
             $table->string('descripcion');
             $table->integer('activo');
 
+            $table->integer('organizador_id');
+
             $table->timestamps();
         });
     }
