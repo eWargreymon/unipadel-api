@@ -17,7 +17,9 @@ use App\Http\Controllers\UserController;
 
 Route::post('createUser', [UserController::class, 'store']);
 Route::get('getUser/{email?}', [UserController::class, 'getUser']);
+
 Route::post('createTorneo', [TorneoController::class, 'store']);
+Route::post('createInscripcion', [TorneoController::class, 'inscripcion']);
 Route::get('getTorneo/{id?}', [TorneoController::class, 'getTorneo']);
 Route::get('getTorneosOrganizador/{organizador}', [TorneoController::class, 'getTorneosOrganizador']);
 

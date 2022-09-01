@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Torneo;
 use App\Models\User;
+use App\Models\Inscripcion;
 
 class TorneoController extends Controller
 {
@@ -54,5 +55,35 @@ class TorneoController extends Controller
                 'message' => 'No se ha podido crear el torneo',
             ]);
         }
+    }
+
+    public function inscripcion(Request $request){
+        try{
+
+            $user = User::where('email',$request->user)->first()->id;
+            $torneo = Torneo::findOrFail($request->torneo);
+
+            if(Inscripcion::where('jugador_id', $user)->where('torneo_id', $torneo->id)->first() != null){
+                return response()->json(['message' => 'Ya existe una inscripción del usuario para este torneo'], 500);
+            }
+
+            $num_inscripciones = Inscripcion::where('torneo_id', $torneo->id)->count();
+
+            if($torneo->max_jugadores*2 - $num_inscripciones > 1){
+                $inscripcion = new Inscripcion();
+                $inscripcion->jugador_id = $user;
+                $inscripcion->torneo_id = $torneo->id;
+                $inscripcion->save();
+                
+                return response()->json(['message' => 'Inscripción registrada'], 200);
+            } else {
+                
+                return response()->json(['message' => 'El torneo se encuentra lleno'], 500);
+            }
+    
+        } catch(\Exception $e){
+            return response()->json(['message' => 'Error en la inscripción', 'error' => $e->getMessage(),], 500);
+        }
+        
     }
 }
