@@ -45,4 +45,9 @@ class UserController extends Controller
             ]);
         }
     }
+
+    public function getJugadores(){
+        $jugadores = User::where('tipo', 0)->get();
+        return $jugadores;
+    }
 }

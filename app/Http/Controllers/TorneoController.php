@@ -38,7 +38,7 @@ class TorneoController extends Controller
         $torneo->formato = $request->formato;
         $torneo->ciudad = $request->ciudad;
         $torneo->club = $request->club;
-        $torneo->max_jugadores = $request->max_jugadores;
+        $torneo->max_parejas = $request->max_jugadores;
         $torneo->precio = $request->precio;
         $torneo->descripcion = $request->descripcion;
         $torneo->activo = $request->activo;

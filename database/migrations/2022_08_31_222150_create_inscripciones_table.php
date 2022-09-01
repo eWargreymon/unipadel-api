@@ -17,7 +17,7 @@ class CreateInscripcionesTable extends Migration
             $table->id();
 
             $table->integer('torneo_id');
-            $table->integer('jugador_id');
+            $table->integer('pareja_id');
 
             $table->timestamps();
         });
