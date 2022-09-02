@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Integrante;
+use App\Models\Pareja;
 use Illuminate\Http\Request;
 use App\Models\User;
 
@@ -54,5 +56,23 @@ class UserController extends Controller
             $jugadores = User::where('tipo', 0)->get();
             return $jugadores;
         }
+    }
+
+    public function createPareja(Request $request){
+        $pareja = new Pareja();
+        $pareja->nombre = $request->nombre;
+        $pareja->save();
+
+        foreach($request->jugadores as $jugador){
+            $integrante = new Integrante();
+            $integrante->id_pareja = $pareja->id;
+            $integrante->id_jugador = $jugador;
+            $integrante->save();
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'Usuario añadido correctamente',
+        ]);
     }
 }

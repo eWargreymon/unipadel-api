@@ -18,6 +18,7 @@ use App\Http\Controllers\UserController;
 Route::post('createUser', [UserController::class, 'store']);
 Route::get('getUser/{email?}', [UserController::class, 'getUser']);
 Route::get('getJugadores/{nombre?}', [UserController::class, 'getJugadores']);
+Route::post('createPareja', [UserController::class, 'createPareja']);
 
 Route::post('createTorneo', [TorneoController::class, 'store']);
 Route::post('createInscripcion', [TorneoController::class, 'inscripcion']);
