@@ -46,8 +46,13 @@ class UserController extends Controller
         }
     }
 
-    public function getJugadores(){
-        $jugadores = User::where('tipo', 0)->get();
-        return $jugadores;
+    public function getJugadores($nombre = null){
+        if(isset($nombre)){
+            $jugadores = User::where('tipo', 0)->where('name','LIKE','%'.$nombre.'%')->get();
+            return $jugadores;
+        }else{   
+            $jugadores = User::where('tipo', 0)->get();
+            return $jugadores;
+        }
     }
 }
