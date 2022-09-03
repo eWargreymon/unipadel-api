@@ -66,13 +66,13 @@ class UserController extends Controller
         foreach($request->jugadores as $jugador){
             $integrante = new Integrante();
             $integrante->id_pareja = $pareja->id;
-            $integrante->id_jugador = $jugador;
+            $integrante->id_jugador = $jugador[0];
             $integrante->save();
         }
 
         return response()->json([
             'status' => 200,
-            'message' => 'Usuario añadido correctamente',
+            'message' => 'Pareja e integrantes añadidos correctamente',
         ]);
     }
 
