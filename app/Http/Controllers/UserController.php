@@ -75,4 +75,19 @@ class UserController extends Controller
             'message' => 'Usuario añadido correctamente',
         ]);
     }
+
+    public function getParejas($user){
+        $id_user = User::where('email', $user)->first()->id;
+
+        $integrantes = Integrante::where('id_jugador', $id_user)->get();
+
+        $parejas = [];
+
+        foreach($integrantes as $integrante){
+            $pareja = Pareja::where('id', $integrante->id_pareja)->first();
+            array_push($parejas, $pareja);
+        }
+
+        return $parejas;
+    }
 }

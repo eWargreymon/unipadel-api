@@ -59,19 +59,17 @@ class TorneoController extends Controller
 
     public function inscripcion(Request $request){
         try{
-
-            $user = User::where('email',$request->user)->first()->id;
             $torneo = Torneo::findOrFail($request->torneo);
 
-            if(Inscripcion::where('jugador_id', $user)->where('torneo_id', $torneo->id)->first() != null){
-                return response()->json(['message' => 'Ya existe una inscripción del usuario para este torneo'], 500);
+            if(Inscripcion::where('pareja_id', $request->pareja)->where('torneo_id', $torneo->id)->first() != null){
+                return response()->json(['message' => 'Ya existe una inscripción de la pareja para este torneo'], 500);
             }
 
             $num_inscripciones = Inscripcion::where('torneo_id', $torneo->id)->count();
 
-            if($torneo->max_jugadores*2 - $num_inscripciones > 1){
+            if($torneo->max_parejas > $num_inscripciones){
                 $inscripcion = new Inscripcion();
-                $inscripcion->jugador_id = $user;
+                $inscripcion->pareja_id = $request->pareja;
                 $inscripcion->torneo_id = $torneo->id;
                 $inscripcion->save();
                 
