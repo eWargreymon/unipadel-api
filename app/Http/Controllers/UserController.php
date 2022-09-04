@@ -66,7 +66,7 @@ class UserController extends Controller
         foreach($request->jugadores as $jugador){
             $integrante = new Integrante();
             $integrante->id_pareja = $pareja->id;
-            $integrante->id_jugador = $jugador[0];
+            $integrante->id_jugador = $jugador;
             $integrante->save();
         }
 
