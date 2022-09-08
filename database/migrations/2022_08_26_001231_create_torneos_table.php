@@ -26,7 +26,8 @@ class CreateTorneosTable extends Migration
             $table->integer('max_parejas');
             $table->float('precio');
             $table->string('descripcion');
-            $table->integer('activo');
+            $table->integer('activo')->default(1);
+            $table->integer('en_juego')->default(0);
 
             $table->integer('organizador_id');
 
