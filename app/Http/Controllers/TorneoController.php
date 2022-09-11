@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Torneo;
 use App\Models\User;
 use App\Models\Inscripcion;
+use App\Models\Pareja;
+use App\Models\Integrante;
 
 class TorneoController extends Controller
 {
@@ -83,5 +85,27 @@ class TorneoController extends Controller
             return response()->json(['message' => 'Error en la inscripción', 'error' => $e->getMessage(),], 500);
         }
         
+    }
+
+    public function getInscripciones($torneo){
+        $inscripciones = Inscripcion::where('torneo_id', $torneo)->get();
+
+        $equipos = [];
+
+        foreach($inscripciones as $inscripcion){
+            $equipo = Pareja::where('id', $inscripcion->pareja_id)->first();
+            $equipoI["id"] = $equipo->id;
+            $equipoI["nombre"] = $equipo->nombre;
+            $integrantes = Integrante::where('id_pareja', $equipo->id)->get();
+            $usuarios = [];
+            foreach($integrantes as $integrante){
+                $user = User::where('id', $integrante->id_jugador)->first(['id', 'name']);
+                array_push($usuarios, $user);
+            }
+            $equipoI["usuarios"] = $usuarios;
+            array_push($equipos,$equipoI);
+        }
+
+        return response()->json($equipos);
     }
 }
