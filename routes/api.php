@@ -28,6 +28,8 @@ Route::get('getTorneosOrganizador/{organizador}', [TorneoController::class, 'get
 
 Route::get('getInscripciones/{torneo}', [TorneoController::class, 'getInscripciones']);
 
+Route::post('createRecurso', [TorneoController::class, 'createRecurso']);
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

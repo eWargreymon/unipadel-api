@@ -108,4 +108,31 @@ class TorneoController extends Controller
 
         return response()->json($equipos);
     }
+
+    public function createRecurso(Request $request){
+        $inicio = $request[0]['inicio'];
+        $fin = $request[0]['fin'];
+        $dif = strtotime($fin) - strtotime($inicio);
+        $hours = date("H", $dif);
+        $duracion = $hours / $request[0]['turnos'];
+        dd($duracion * 60);
+        dd($this->SplitTime($inicio, $fin, '60'));
+    }
+
+    // Apuntes
+    // Function taken from W3schools: https://www.w3schools.in/php/examples/split-a-time-slot-between-the-start-and-end-time-using-the-time-interval
+    public function SplitTime($StartTime, $EndTime, $Duration="60"){
+        $ReturnArray = array ();// Define output
+        $StartTime    = strtotime ($StartTime); //Get Timestamp
+        $EndTime      = strtotime ($EndTime); //Get Timestamp
+    
+        $AddMins  = $Duration * 60;
+    
+        while ($StartTime <= $EndTime) //Run loop
+        {
+            $ReturnArray[] = date ("G:i", $StartTime);
+            $StartTime += $AddMins; //Endtime check
+        }
+        return $ReturnArray;
+    }
 }
