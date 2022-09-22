@@ -123,33 +123,34 @@ class TorneoController extends Controller
         $horarios = [];
 
         if ($request[0]['lunes']) {
-            for ($fecha_inicio; $fecha_inicio <= $fecha_fin; $fecha_inicio = strtotime("+7 day", $fecha_inicio)) {
-                $next_monday = strtotime("monday", $fecha_inicio);
-                
-                if ($next_monday > $fecha_fin) break;
-
-                $inicio = strtotime(date('d-m-Y',$next_monday). ' ' . $hora);
-
-                for ($i = 0; $i < $turnos; $i++) {
-
-                    $horario['inicio'] = date('d-m-Y H:i', $inicio);
-                    $inicio += $turno;
-                    $horario['fin'] = date('d-m-Y H:i', $inicio);
-
-                    array_push($horarios, $horario);
-                }
-            }
-            dd($horarios);
+            $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'monday');
+            dd($recursos);
         }
-
-        // dd($horarios);
-
-        // $hours = date("H", $dif);
-        // $duracion = $hours / $request[0]['turnos'];
-        // dd($duracion * 60);
-        // dd($this->SplitTime($inicio, $fin, '60'));
     }
 
+    // Crea recursos para el día indicado entre las fechas de inicio y fin del torneo
+    public function createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, $dia){
+        $horarios = [];
+        for ($fecha_inicio; $fecha_inicio <= $fecha_fin; $fecha_inicio = strtotime("+7 day", $fecha_inicio)) {
+            $next_monday = strtotime($dia, $fecha_inicio);
+            
+            if ($next_monday > $fecha_fin) break;
+
+            $inicio = strtotime(date('d-m-Y',$next_monday). ' ' . $hora);
+
+            for ($i = 0; $i < $turnos; $i++) {
+
+                $horario['inicio'] = date('d-m-Y H:i', $inicio);
+                $inicio += $turno;
+                $horario['fin'] = date('d-m-Y H:i', $inicio);
+
+                array_push($horarios, $horario);
+            }
+        }
+        return $horarios;
+    }
+
+    // Obtiene la duración de los turnos dada una hora de inicio y fin de disponibilidad de la cancha
     public function getDuracionTurno($inicio, $fin, $turnos)
     {
         $inicio = strtotime($inicio);
