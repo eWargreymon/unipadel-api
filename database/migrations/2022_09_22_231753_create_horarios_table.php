@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateIntegrantesTable extends Migration
+class CreateHorariosTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,14 @@ class CreateIntegrantesTable extends Migration
      */
     public function up()
     {
-        Schema::create('integrantes', function (Blueprint $table) {
+        Schema::create('horarios', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('id_pareja')
-                ->constrained('parejas')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
-                
-            $table->foreignId('id_jugador')
-                ->constrained('users')
+            $table->dateTime('inicio');
+            $table->dateTime('fin');
+            $table->integer('ocupado')->default(0);
+            $table->foreignId('id_cancha')
+                ->constrained('canchas')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
 
@@ -37,6 +35,6 @@ class CreateIntegrantesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('integrantes');
+        Schema::dropIfExists('horarios');
     }
 }
