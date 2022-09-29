@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Inscripcion;
 use App\Models\Pareja;
 use App\Models\Integrante;
+use App\Models\Partido;
 
 class TorneoController extends Controller
 {
@@ -234,4 +235,54 @@ class TorneoController extends Controller
     //     }
     //     return $ReturnArray;
     // }
+
+    public function generateCalendario(Request $request){
+        $torneo = Torneo::findOrFail($request->torneo);
+        $inscripciones = Inscripcion::where('torneo_id', $torneo->id)->select('pareja_id')->pluck('pareja_id');
+        for ($i = 0; $i < count($inscripciones)-1; $i++){
+            for($j = $i+1; $j<count($inscripciones); $j++){
+                $partido = new Partido();
+                $partido->p1 = $inscripciones[$i];
+                $partido->p2 = $inscripciones[$j];
+                $partido->torneo_id = $torneo->id;
+                $partido->save();
+            }
+        }
+        
+        $jornadas = $this->getJornadas(count($inscripciones));
+        
+        $fecha_inicio = strtotime($torneo->fecha_inicio);
+        $fecha_fin = strtotime("+7 day", $fecha_inicio);
+        
+        // for($i = 0; $i < $jornadas; $i++){
+        //     $ids = [1,2];
+        //     for($j=0; $j<count($inscripciones)/2; $j++){
+        //         $partido = Partido::whereNotIn('p1', $ids)->whereNotIn('p2', $ids)->first();
+        //         if($partido != null){
+        //             $horario = Horario::where('ocupado', 0)->where('inicio', '<=', $fecha_inicio)->where('fin', '>=', $fecha_fin)->first();
+        //             if($horario != null){
+        //                 $partido->horario = $horario->id;
+        //                 $partido->save();
+        //                 $horario->ocupado = 1;
+        //                 $horario->save();
+        //             }
+        //             dd($partido);
+        //         }
+        //     }
+        //     $fecha_inicio = strtotime("+7 day", $fecha_inicio);
+        //     $fecha_fin = strtotime("+7 day", $fecha_fin);
+        // }
+    }
+
+    // Función que devuelve el nº de jornadas en función de los equipos inscritos
+    public function getJornadas($equipos){
+        switch ($equipos) {
+            case 1:
+                return false;
+            case ($equipos%2 == 0):
+                return $equipos-1;
+            default:
+                return $equipos;
+        }
+    }
 }

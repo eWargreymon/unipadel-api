@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateInscripcionesTable extends Migration
+class CreateJornadasTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,14 @@ class CreateInscripcionesTable extends Migration
      */
     public function up()
     {
-        Schema::create('inscripciones', function (Blueprint $table) {
+        Schema::create('jornadas', function (Blueprint $table) {
             $table->id();
 
-            $table->integer('torneo_id');
-            $table->integer('pareja_id');
+            $table->unsignedBigInteger('torneo_id');
 
             $table->timestamps();
+
+            $table->foreign('torneo_id')->references('id')->on('torneos')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
@@ -30,6 +31,6 @@ class CreateInscripcionesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('inscripciones');
+        Schema::dropIfExists('jornadas');
     }
 }
