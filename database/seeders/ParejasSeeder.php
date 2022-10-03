@@ -34,5 +34,15 @@ class ParejasSeeder extends Seeder
                 "nombre" => "D"
             ]
         ]);
+        DB::table('parejas')->insert([
+            [
+                "nombre" => "E"
+            ]
+        ]);
+        DB::table('parejas')->insert([
+            [
+                "nombre" => "F"
+            ]
+        ]);
     }
 }

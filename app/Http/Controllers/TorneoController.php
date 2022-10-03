@@ -123,9 +123,9 @@ class TorneoController extends Controller
         $torneo = Torneo::where('id', $request->torneo)->first();
         $fecha_inicio = strtotime($torneo->fecha_inicio);
         $fecha_fin = strtotime($torneo->fecha_fin);
-        
+
         foreach ($request->horarios as $h) {
-            
+
             $turno = $this->getDuracionTurno($h['inicio'], $h['fin'], $h['turnos']);
 
             $hora = $h['inicio'];
@@ -178,8 +178,8 @@ class TorneoController extends Controller
             foreach ($horarios as $horario) {
                 $hor = new Horario();
                 $hor->id_cancha = $cancha->id;
-                $hor->inicio = date('Y-m-d H:i:s',strtotime($horario['inicio']));
-                $hor->fin = date('Y-m-d H:i:s',strtotime($horario['fin']));
+                $hor->inicio = date('Y-m-d H:i:s', strtotime($horario['inicio']));
+                $hor->fin = date('Y-m-d H:i:s', strtotime($horario['fin']));
                 $hor->save();
             }
         }
@@ -236,53 +236,86 @@ class TorneoController extends Controller
     //     return $ReturnArray;
     // }
 
-    public function generateCalendario(Request $request){
+    // Gran ayuda de un maestro de StackOverflow: https://stackoverflow.com/questions/61168832/simple-algorithm-to-create-round-robin-league-in-php
+
+    public function generateCalendario(Request $request)
+    {
+
         $torneo = Torneo::findOrFail($request->torneo);
-        $inscripciones = Inscripcion::where('torneo_id', $torneo->id)->select('pareja_id')->pluck('pareja_id');
-        for ($i = 0; $i < count($inscripciones)-1; $i++){
-            for($j = $i+1; $j<count($inscripciones); $j++){
-                $partido = new Partido();
-                $partido->p1 = $inscripciones[$i];
-                $partido->p2 = $inscripciones[$j];
-                $partido->torneo_id = $torneo->id;
-                $partido->save();
-            }
-        }
-        
+        $inscripciones = Inscripcion::where('torneo_id', $torneo->id)->pluck('pareja_id');
+
+        if (count($inscripciones) < 2) return false;
+        if (count($inscripciones) % 2 == 1) $inscripciones[] = 'blank'; // if number of inscripciones is even, add a dummy team that means 'this team don't play this round'
+
         $jornadas = $this->getJornadas(count($inscripciones));
-        
-        $fecha_inicio = strtotime($torneo->fecha_inicio);
-        $fecha_fin = strtotime("+7 day", $fecha_inicio);
-        
-        // for($i = 0; $i < $jornadas; $i++){
-        //     $ids = [1,2];
-        //     for($j=0; $j<count($inscripciones)/2; $j++){
-        //         $partido = Partido::whereNotIn('p1', $ids)->whereNotIn('p2', $ids)->first();
-        //         if($partido != null){
-        //             $horario = Horario::where('ocupado', 0)->where('inicio', '<=', $fecha_inicio)->where('fin', '>=', $fecha_fin)->first();
-        //             if($horario != null){
-        //                 $partido->horario = $horario->id;
-        //                 $partido->save();
-        //                 $horario->ocupado = 1;
-        //                 $horario->save();
-        //             }
-        //             dd($partido);
-        //         }
-        //     }
-        //     $fecha_inicio = strtotime("+7 day", $fecha_inicio);
-        //     $fecha_fin = strtotime("+7 day", $fecha_fin);
-        // }
+        $partidosPorJornada = count($inscripciones) / 2;
+
+        for ($round = 0; $round < $jornadas; $round++) {
+
+            for ($i = 0; $i < $partidosPorJornada; $i++) {
+                $opponent = count($inscripciones) - 1 - $i;
+                if ($inscripciones[$i] != 'blank' && $inscripciones[$opponent] != 'blank') {
+                    $partido = new Partido();
+                    $partido->p1 = $inscripciones[$i];
+                    $partido->p2 = $inscripciones[$opponent];
+                    $partido->torneo_id = $torneo->id;
+                    $partido->jornada_id = $round;
+                    $partido->save();
+                }
+            }
+
+            $result = $inscripciones;
+            $tmp = $result[count($result) - 1];
+            for ($i = count($result) - 1; $i > 1; --$i) {
+                $result[$i] = $result[$i - 1];
+            }
+            $result[1] = $tmp;
+        }
+
+        $fecha_inicio = date('Y-m-d H:i', strtotime($torneo->fecha_inicio));
+        $fecha_fin = date('Y-m-d H:i', strtotime("+6 day", strtotime($fecha_inicio)));
+
+        for ($round = 0; $round < $jornadas; ++$round) {
+            for ($i = 0; $i < $partidosPorJornada; $i++) {
+                $partido = Partido::where('jornada_id', $round)->whereNull('horario_id')->inRandomOrder()->first();
+                if ($partido != null) {
+                    $horario = Horario::where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
+                    if ($horario != null) {
+                        $partido->horario_id = $horario->id;
+                        $partido->save();
+                        $horario->ocupado = 1;
+                        $horario->save();
+                    }
+                }
+            }
+            $fecha_inicio = date('Y-m-d H:i', strtotime("+7 day", strtotime($fecha_inicio)));
+            $fecha_fin = date('Y-m-d H:i', strtotime("+7 day", strtotime($fecha_fin)));
+        }
     }
 
     // Función que devuelve el nº de jornadas en función de los equipos inscritos
-    public function getJornadas($equipos){
+    public function getJornadas($equipos)
+    {
         switch ($equipos) {
             case 1:
                 return false;
-            case ($equipos%2 == 0):
-                return $equipos-1;
+            case ($equipos % 2 == 0):
+                return $equipos - 1;
             default:
                 return $equipos;
         }
     }
+
+    //Planteamiento erróneo inicial
+    /*
+        // for ($i = 0; $i < count($inscripciones)-1; $i++){
+        //     for($j = $i+1; $j<count($inscripciones); $j++){
+        //         $partido = new Partido();
+        //         $partido->p1 = $inscripciones[$i];
+        //         $partido->p2 = $inscripciones[$j];
+        //         $partido->torneo_id = $torneo->id;
+        //         $partido->save();
+        //     }
+        // }
+    */
 }
