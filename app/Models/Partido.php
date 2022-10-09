@@ -10,4 +10,20 @@ class Partido extends Model
     use HasFactory;
 
     protected $table = 'partidos';
+
+    public function horario(){
+        return $this->belongsTo(Horario::class);
+    }
+
+    public function pareja1(){
+        return $this->belongsTo(Pareja::class, 'p1');
+    }
+
+    public function pareja2(){
+        return $this->belongsTo(Pareja::class, 'p2');
+    }
+
+    public function torneo(){
+        return $this->belongsTo(Torneo::class);
+    }
 }

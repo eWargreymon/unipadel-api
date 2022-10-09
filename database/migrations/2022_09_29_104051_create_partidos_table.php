@@ -20,7 +20,8 @@ class CreatePartidosTable extends Migration
             $table->unsignedBigInteger('p2');
             $table->unsignedBigInteger('torneo_id');
             $table->unsignedBigInteger('horario_id')->nullable();
-            $table->integer('jornada_id')->nullable();
+            $table->integer('jornada')->nullable();
+            $table->integer('estado')->default(0);
 
             $table->timestamps();
 

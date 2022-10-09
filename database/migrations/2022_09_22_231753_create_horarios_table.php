@@ -19,12 +19,11 @@ class CreateHorariosTable extends Migration
             $table->dateTime('inicio');
             $table->dateTime('fin');
             $table->integer('ocupado')->default(0);
-            $table->foreignId('id_cancha')
-                ->constrained('canchas')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
+            $table->unsignedBigInteger('id_cancha');
 
             $table->timestamps();
+            
+            $table->foreign('id_cancha')->references('id')->on('canchas')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

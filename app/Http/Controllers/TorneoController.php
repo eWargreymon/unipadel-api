@@ -259,7 +259,7 @@ class TorneoController extends Controller
                     $partido->p1 = $inscripciones[$i];
                     $partido->p2 = $inscripciones[$opponent];
                     $partido->torneo_id = $torneo->id;
-                    $partido->jornada_id = $round;
+                    $partido->jornada = $round;
                     $partido->save();
                 }
             }
@@ -277,7 +277,7 @@ class TorneoController extends Controller
 
         for ($round = 0; $round < $jornadas; ++$round) {
             for ($i = 0; $i < $partidosPorJornada; $i++) {
-                $partido = Partido::where('jornada_id', $round)->whereNull('horario_id')->inRandomOrder()->first();
+                $partido = Partido::where('jornada', $round)->whereNull('horario_id')->inRandomOrder()->first();
                 if ($partido != null) {
                     $horario = Horario::where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
                     if ($horario != null) {
