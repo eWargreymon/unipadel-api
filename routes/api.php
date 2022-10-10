@@ -25,7 +25,7 @@ Route::get('getParejas/{email}', [UserController::class, 'getParejas']);
 Route::post('createTorneo', [TorneoController::class, 'store']);
 Route::post('createInscripcion', [TorneoController::class, 'inscripcion']);
 Route::get('getTorneo/{id?}', [TorneoController::class, 'getTorneo']);
-Route::get('getTorneosOrganizador/{organizador}', [TorneoController::class, 'getTorneosOrganizador']);
+Route::get('getTorneosOrganizador/{organizador}/{estado?}', [TorneoController::class, 'getTorneosOrganizador']);
 Route::get('getTorneosJugador/{jugador}', [TorneoController::class, 'getTorneosJugador']);
 Route::get('getInscripciones/{torneo}', [TorneoController::class, 'getInscripciones']);
 Route::post('createRecurso', [TorneoController::class, 'createRecurso']);

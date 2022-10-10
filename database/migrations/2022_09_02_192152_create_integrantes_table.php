@@ -15,18 +15,14 @@ class CreateIntegrantesTable extends Migration
     {
         Schema::create('integrantes', function (Blueprint $table) {
             $table->id();
-
-            $table->foreignId('id_pareja')
-                ->constrained('parejas')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
                 
-            $table->foreignId('id_jugador')
-                ->constrained('users')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
+            $table->unsignedBigInteger('id_pareja');
+            $table->unsignedBigInteger('id_jugador');
 
             $table->timestamps();
+            
+            $table->foreign('id_pareja')->references('id')->on('parejas')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('id_jugador')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

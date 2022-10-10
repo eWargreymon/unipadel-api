@@ -19,22 +19,21 @@ class CreateTorneosTable extends Migration
             $table->string('nombre');
             $table->date('fecha_inicio');
             $table->date('fecha_fin');
-            $table->date('fecha_limite')->nullable();
+            $table->date('fecha_limite');
             $table->integer('formato')->default(1);
             $table->string('ciudad')->nullable();
             $table->string('club')->nullable();
             $table->integer('max_parejas');
             $table->float('precio')->nullable();
             $table->string('descripcion')->nullable();
-            $table->integer('activo')->default(1);
+            $table->integer('estado')->default(0);
             $table->integer('en_juego')->default(0);
 
-            $table->foreignId('organizador_id')
-                ->constrained('users')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
+            $table->unsignedBigInteger('organizador_id');
 
             $table->timestamps();
+            $table->foreign('organizador_id')->references('id')->on('users')->onUpdate('cascade')->onDelete('cascade');
+
         });
     }
 

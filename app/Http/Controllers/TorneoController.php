@@ -24,18 +24,20 @@ class TorneoController extends Controller
         return response()->json($torneo);
     }
 
-    public function getTorneosOrganizador($organizador)
+    public function getTorneosOrganizador($organizador, $estado=null)
     {
-        $organizador_id = User::where('email', $organizador)->first()->id;
-        $torneos = Torneo::where('organizador_id', $organizador_id)->get();
-        return response()->json($torneos);
+        $torneos = Torneo::where('organizador_id', $organizador);
+        if(isset($estado)){
+            $torneos = $torneos->where('estado', $estado);
+        }
+        return response()->json($torneos->get());
     }
 
     public function getTorneosJugador($jugador)
     {
         $parejas = Integrante::where('id_jugador', $jugador)->select('id_pareja')->get()->pluck('id_pareja')->toArray();
         $inscripciones = Inscripcion::whereIn('pareja_id', $parejas)->get()->pluck('torneo_id')->toArray();
-        $torneos = Torneo::where('activo', 1)->whereIn('id', $inscripciones)->get();
+        $torneos = Torneo::where('estado', 1)->whereIn('id', $inscripciones)->get();
         return response()->json($torneos);
     }
 
@@ -54,7 +56,7 @@ class TorneoController extends Controller
         $torneo->max_parejas = $request->max_jugadores;
         $torneo->precio = $request->precio;
         $torneo->descripcion = $request->descripcion;
-        $torneo->activo = $request->activo;
+        $torneo->estado = $request->activo;
         $torneo->organizador_id = $organizador_id;
 
         if ($torneo->save()) {
