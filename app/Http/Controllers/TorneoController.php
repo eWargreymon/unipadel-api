@@ -31,6 +31,14 @@ class TorneoController extends Controller
         return response()->json($torneos);
     }
 
+    public function getTorneosJugador($jugador)
+    {
+        $parejas = Integrante::where('id_jugador', $jugador)->select('id_pareja')->get()->pluck('id_pareja')->toArray();
+        $inscripciones = Inscripcion::whereIn('pareja_id', $parejas)->get()->pluck('torneo_id')->toArray();
+        $torneos = Torneo::where('activo', 1)->whereIn('id', $inscripciones)->get();
+        return response()->json($torneos);
+    }
+
     public function store(Request $request)
     {
         $organizador_id = User::where('email', $request->organizador)->first()->id;
