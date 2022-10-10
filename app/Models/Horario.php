@@ -10,4 +10,8 @@ class Horario extends Model
     use HasFactory;
 
     protected $table = 'horarios';
+
+    public function cancha(){
+        return $this->belongsTo(Cancha::class, 'id_cancha');
+    }
 }

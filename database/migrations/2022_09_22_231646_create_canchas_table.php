@@ -17,13 +17,10 @@ class CreateCanchasTable extends Migration
             $table->id();
 
             $table->string('nombre');
-            
-            $table->foreignId('id_torneo')
-                ->constrained('torneos')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
+            $table->unsignedBigInteger('id_torneo');
 
             $table->timestamps();
+            $table->foreign('id_torneo')->references('id')->on('torneos')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 
