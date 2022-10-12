@@ -56,7 +56,7 @@ class TorneoController extends Controller
         $torneo->max_parejas = $request->max_jugadores;
         $torneo->precio = $request->precio;
         $torneo->descripcion = $request->descripcion;
-        $torneo->estado = $request->activo;
+        // $torneo->estado = $request->activo;
         $torneo->organizador_id = $organizador_id;
 
         if ($torneo->save()) {
@@ -109,6 +109,7 @@ class TorneoController extends Controller
             $equipo = Pareja::where('id', $inscripcion->pareja_id)->first();
             $equipoI["id"] = $equipo->id;
             $equipoI["nombre"] = $equipo->nombre;
+            $equipoI["validated"] = $inscripcion->validated;
             $integrantes = Integrante::where('id_pareja', $equipo->id)->get();
             $usuarios = [];
             foreach ($integrantes as $integrante) {
@@ -328,4 +329,31 @@ class TorneoController extends Controller
         //     }
         // }
     */
+
+    public function validatePareja(Request $request){
+        if($request->validate){
+            $inscripcion = Inscripcion::where('pareja_id',$request->pareja)->where('torneo_id', $request->torneo)->first();
+            $inscripcion->validated = 1;
+            $inscripcion->save();
+            return response()->json(['message' => 'Pareja validada'], 200); 
+        } else {
+            $inscripcion = Inscripcion::where('pareja_id',$request->pareja)->where('torneo_id', $request->torneo)->delete();
+            return response()->json(['message' => 'Pareja eliminada del torneo'], 200); 
+        }
+    }
+
+    public function getHorariosTorneo($torneo){
+        $canchas = Cancha::where('id_torneo',$torneo)->get();
+        $horariosArr = [];
+
+        foreach($canchas as $cancha) {
+            $horarios = Horario::where('id_cancha', $cancha->id)->with('cancha:id,nombre')->get();
+
+            foreach($horarios as $horario){
+                array_push($horariosArr, $horario);
+            }
+        }
+
+        return response()->json($horariosArr);
+    }
 }

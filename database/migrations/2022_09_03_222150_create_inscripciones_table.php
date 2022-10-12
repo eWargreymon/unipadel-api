@@ -18,6 +18,7 @@ class CreateInscripcionesTable extends Migration
 
             $table->unsignedBigInteger('torneo_id');
             $table->unsignedBigInteger('pareja_id');
+            $table->boolean('validated')->default(0);
 
             $table->timestamps();
 
