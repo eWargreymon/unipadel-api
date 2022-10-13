@@ -343,12 +343,18 @@ class TorneoController extends Controller
         }
     }
 
-    public function getHorariosTorneo($torneo){
-        $canchas = Cancha::where('id_torneo',$torneo)->get();
+    public function getHorariosTorneo($id, $isTorneo){
         $horariosArr = [];
-
-        foreach($canchas as $cancha) {
-            $horarios = Horario::where('id_cancha', $cancha->id)->where('inicio','>=',Carbon::now()->toDateTimeString())->orderBy('inicio', 'asc')->with('cancha:id,nombre')->get();
+        if($isTorneo){
+            $canchas = Cancha::where('id_torneo',$id)->get();
+            foreach($canchas as $cancha) {
+                $horarios = Horario::where('id_cancha', $cancha->id)->where('inicio','>=',Carbon::now()->toDateTimeString())->orderBy('inicio', 'asc')->with('cancha:id,nombre')->get();
+                foreach($horarios as $horario){
+                    array_push($horariosArr, $horario);
+                }
+            }
+        } else {
+            $horarios = Horario::where('id_cancha', $id)->where('inicio','>=',Carbon::now()->toDateTimeString())->orderBy('inicio', 'asc')->with('cancha:id,nombre')->get();
             foreach($horarios as $horario){
                 array_push($horariosArr, $horario);
             }
@@ -365,5 +371,10 @@ class TorneoController extends Controller
         } else {
             return response()->json(['message' => 'No se puede eliminar un horario en uso para un partido'], 403);
         }
+    }
+
+    public function getCancha($torneo){
+        $canchas = Cancha::where('id_torneo',$torneo)->get();
+        return response()->json($canchas);
     }
 }
