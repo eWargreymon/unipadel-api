@@ -11,6 +11,7 @@ use App\Models\Inscripcion;
 use App\Models\Pareja;
 use App\Models\Integrante;
 use App\Models\Partido;
+use Carbon\Carbon;
 
 class TorneoController extends Controller
 {
@@ -347,13 +348,22 @@ class TorneoController extends Controller
         $horariosArr = [];
 
         foreach($canchas as $cancha) {
-            $horarios = Horario::where('id_cancha', $cancha->id)->with('cancha:id,nombre')->get();
-
+            $horarios = Horario::where('id_cancha', $cancha->id)->where('inicio','>=',Carbon::now()->toDateTimeString())->orderBy('inicio', 'asc')->with('cancha:id,nombre')->get();
             foreach($horarios as $horario){
                 array_push($horariosArr, $horario);
             }
         }
 
         return response()->json($horariosArr);
+    }
+
+    public function deleteHorario($horario){
+        $horario = Horario::where('id',$horario)->first();
+        if($horario->ocupado == 0){
+            $horario->delete();
+            return response()->json(['message' => 'Horario eliminado'], 200);
+        } else {
+            return response()->json(['message' => 'No se puede eliminar un horario en uso para un partido'], 403);
+        }
     }
 }
