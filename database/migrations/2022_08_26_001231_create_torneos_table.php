@@ -27,7 +27,8 @@ class CreateTorneosTable extends Migration
             $table->float('precio')->nullable();
             $table->string('descripcion')->nullable();
             $table->integer('estado')->default(0);
-            $table->integer('en_juego')->default(0);
+            // $table->integer('en_juego')->default(0);
+            $table->integer('calendario_generado')->default(0);
 
             $table->unsignedBigInteger('organizador_id');
 

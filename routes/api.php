@@ -31,12 +31,16 @@ Route::get('getCanchaTorneo/{torneo}', [TorneoController::class, 'getCancha']);
 Route::get('getTorneosOrganizador/{organizador}/{estado?}', [TorneoController::class, 'getTorneosOrganizador']);
 Route::get('getTorneosJugador/{jugador}', [TorneoController::class, 'getTorneosJugador']);
 Route::get('getInscripciones/{torneo}', [TorneoController::class, 'getInscripciones']);
+Route::post('validatePareja', [TorneoController::class, 'validatePareja']);
+
 Route::post('createRecurso', [TorneoController::class, 'createRecurso']);
 Route::post('generateCalendario', [TorneoController::class, 'generateCalendario']);
-Route::post('validatePareja', [TorneoController::class, 'validatePareja']);
+Route::post('setHorarios', [TorneoController::class, 'setHorariosJornada']);
 
 Route::get('getPartido/{id}', [PartidosController::class, 'getPartido']);
 Route::post('getPartidos', [PartidosController::class, 'getPartidos']);
+Route::get('getJornadasTorneo/{torneo}', [PartidosController::class, 'getJornadasTorneo']);
+Route::post('getPartidosTorneo', [PartidosController::class, 'getPartidosTorneo']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

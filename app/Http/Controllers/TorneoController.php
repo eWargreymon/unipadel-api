@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\Inscripcion;
 use App\Models\Pareja;
 use App\Models\Integrante;
+use App\Models\Jornada;
 use App\Models\Partido;
 use Carbon\Carbon;
 
@@ -25,10 +26,10 @@ class TorneoController extends Controller
         return response()->json($torneo);
     }
 
-    public function getTorneosOrganizador($organizador, $estado=null)
+    public function getTorneosOrganizador($organizador, $estado = null)
     {
         $torneos = Torneo::where('organizador_id', $organizador);
-        if(isset($estado)){
+        if (isset($estado)) {
             $torneos = $torneos->where('estado', $estado);
         }
         return response()->json($torneos->get());
@@ -264,6 +265,11 @@ class TorneoController extends Controller
 
         for ($round = 0; $round < $jornadas; $round++) {
 
+            $jornada = new Jornada();
+            $jornada->numero = $round + 1;
+            $jornada->torneo_id = $torneo->id;
+            $jornada->save();
+
             for ($i = 0; $i < $partidosPorJornada; $i++) {
                 $opponent = count($inscripciones) - 1 - $i;
                 if ($inscripciones[$i] != 'blank' && $inscripciones[$opponent] != 'blank') {
@@ -271,7 +277,7 @@ class TorneoController extends Controller
                     $partido->p1 = $inscripciones[$i];
                     $partido->p2 = $inscripciones[$opponent];
                     $partido->torneo_id = $torneo->id;
-                    $partido->jornada = $round;
+                    $partido->jornada_id = $jornada->id;
                     $partido->save();
                 }
             }
@@ -284,25 +290,10 @@ class TorneoController extends Controller
             $result[1] = $tmp;
         }
 
-        $fecha_inicio = date('Y-m-d H:i', strtotime($torneo->fecha_inicio));
-        $fecha_fin = date('Y-m-d H:i', strtotime("+6 day", strtotime($fecha_inicio)));
+        $torneo->calendario_generado = 1;
+        $torneo->save();
 
-        for ($round = 0; $round < $jornadas; ++$round) {
-            for ($i = 0; $i < $partidosPorJornada; $i++) {
-                $partido = Partido::where('jornada', $round)->whereNull('horario_id')->inRandomOrder()->first();
-                if ($partido != null) {
-                    $horario = Horario::where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
-                    if ($horario != null) {
-                        $partido->horario_id = $horario->id;
-                        $partido->save();
-                        $horario->ocupado = 1;
-                        $horario->save();
-                    }
-                }
-            }
-            $fecha_inicio = date('Y-m-d H:i', strtotime("+7 day", strtotime($fecha_inicio)));
-            $fecha_fin = date('Y-m-d H:i', strtotime("+7 day", strtotime($fecha_fin)));
-        }
+        return response()->json(['message' => 'Calendario de jornadas generado'], 200);
     }
 
     // Función que devuelve el nº de jornadas en función de los equipos inscritos
@@ -318,6 +309,60 @@ class TorneoController extends Controller
         }
     }
 
+    public function setHorariosJornada(Request $request)
+    {
+        $fecha_inicio = date('Y-m-d H:i', strtotime($request->fecha_inicio));
+        $fecha_fin = date('Y-m-d H:i', strtotime($request->fecha_fin));
+        $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->first();
+        $todos_horarios = true;
+
+        foreach ($partidos as $partido) {
+            $horario = Horario::where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
+            if ($horario != null) {
+                $partido->horario_id = $horario->id;
+                $partido->save();
+                $horario->ocupado = 1;
+                $horario->save();
+            } else {
+                $todos_horarios = false;
+            }
+        }
+
+        return response()->json($todos_horarios);
+    }
+
+    /* 
+        Función para asignar horarios a todas las jornadas, desde el comienzo del campeonato hasta el final
+        Jornadas de 7 días
+        Todas seguidas, sin descansos, comenzando con la fecha de inicio del campeonato
+    */
+    // public function setHorariosCompleto(Request $request){
+    //     $torneo = Torneo::findOrFail($request->torneo);
+    //     $inscripciones = Inscripcion::where('torneo_id', $torneo->id)->pluck('pareja_id');
+    //     $jornadas = $this->getJornadas(count($inscripciones));
+    //     $partidosPorJornada = count($inscripciones) / 2;
+
+    //     $fecha_inicio = date('Y-m-d H:i', strtotime($torneo->fecha_inicio));
+    //     $fecha_fin = date('Y-m-d H:i', strtotime("+6 day", strtotime($fecha_inicio)));
+
+    //     for ($round = 0; $round < $jornadas; ++$round) {
+    //         for ($i = 0; $i < $partidosPorJornada; $i++) {
+    //             $partido = Partido::where('jornada', $round)->whereNull('horario_id')->inRandomOrder()->first();
+    //             if ($partido != null) {
+    //                 $horario = Horario::where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
+    //                 if ($horario != null) {
+    //                     $partido->horario_id = $horario->id;
+    //                     $partido->save();
+    //                     $horario->ocupado = 1;
+    //                     $horario->save();
+    //                 }
+    //             }
+    //         }
+    //         $fecha_inicio = date('Y-m-d H:i', strtotime("+7 day", strtotime($fecha_inicio)));
+    //         $fecha_fin = date('Y-m-d H:i', strtotime("+7 day", strtotime($fecha_fin)));
+    //     }
+    // }
+
     //Planteamiento erróneo inicial
     /*
         // for ($i = 0; $i < count($inscripciones)-1; $i++){
@@ -331,31 +376,33 @@ class TorneoController extends Controller
         // }
     */
 
-    public function validatePareja(Request $request){
-        if($request->validate){
-            $inscripcion = Inscripcion::where('pareja_id',$request->pareja)->where('torneo_id', $request->torneo)->first();
+    public function validatePareja(Request $request)
+    {
+        if ($request->validate) {
+            $inscripcion = Inscripcion::where('pareja_id', $request->pareja)->where('torneo_id', $request->torneo)->first();
             $inscripcion->validated = 1;
             $inscripcion->save();
-            return response()->json(['message' => 'Pareja validada'], 200); 
+            return response()->json(['message' => 'Pareja validada'], 200);
         } else {
-            $inscripcion = Inscripcion::where('pareja_id',$request->pareja)->where('torneo_id', $request->torneo)->delete();
-            return response()->json(['message' => 'Pareja eliminada del torneo'], 200); 
+            $inscripcion = Inscripcion::where('pareja_id', $request->pareja)->where('torneo_id', $request->torneo)->delete();
+            return response()->json(['message' => 'Pareja eliminada del torneo'], 200);
         }
     }
 
-    public function getHorariosTorneo($id, $isTorneo){
+    public function getHorariosTorneo($id, $isTorneo)
+    {
         $horariosArr = [];
-        if($isTorneo == "true"){
-            $canchas = Cancha::where('id_torneo',$id)->get();
-            foreach($canchas as $cancha) {
-                $horarios = Horario::where('id_cancha', $cancha->id)->where('inicio','>=',Carbon::now()->toDateTimeString())->orderBy('inicio', 'asc')->with('cancha:id,nombre')->get();
-                foreach($horarios as $horario){
+        if ($isTorneo == "true") {
+            $canchas = Cancha::where('id_torneo', $id)->get();
+            foreach ($canchas as $cancha) {
+                $horarios = Horario::where('id_cancha', $cancha->id)->where('inicio', '>=', Carbon::now()->toDateTimeString())->orderBy('inicio', 'asc')->with('cancha:id,nombre')->get();
+                foreach ($horarios as $horario) {
                     array_push($horariosArr, $horario);
                 }
             }
         } else {
-            $horarios = Horario::where('id_cancha', $id)->where('inicio','>=',Carbon::now()->toDateTimeString())->orderBy('inicio', 'asc')->with('cancha:id,nombre')->get();
-            foreach($horarios as $horario){
+            $horarios = Horario::where('id_cancha', $id)->where('inicio', '>=', Carbon::now()->toDateTimeString())->orderBy('inicio', 'asc')->with('cancha:id,nombre')->get();
+            foreach ($horarios as $horario) {
                 array_push($horariosArr, $horario);
             }
         }
@@ -363,9 +410,10 @@ class TorneoController extends Controller
         return response()->json($horariosArr);
     }
 
-    public function deleteHorario($horario){
-        $horario = Horario::where('id',$horario)->first();
-        if($horario->ocupado == 0){
+    public function deleteHorario($horario)
+    {
+        $horario = Horario::where('id', $horario)->first();
+        if ($horario->ocupado == 0) {
             $horario->delete();
             return response()->json(['message' => 'Horario eliminado'], 200);
         } else {
@@ -373,8 +421,9 @@ class TorneoController extends Controller
         }
     }
 
-    public function getCancha($torneo){
-        $canchas = Cancha::where('id_torneo',$torneo)->get();
+    public function getCancha($torneo)
+    {
+        $canchas = Cancha::where('id_torneo', $torneo)->get();
         return response()->json($canchas);
     }
 }

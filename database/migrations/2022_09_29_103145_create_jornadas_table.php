@@ -16,6 +16,7 @@ class CreateJornadasTable extends Migration
         Schema::create('jornadas', function (Blueprint $table) {
             $table->id();
 
+            $table->integer('numero');
             $table->unsignedBigInteger('torneo_id');
 
             $table->timestamps();

@@ -44,7 +44,7 @@ class TorneoSeeder extends Seeder
                 "nombre" => "Triangular Doble FFP",
                 "organizador_id" => "1",
                 "precio" => "12",
-                "en_juego" => "1"
+                // "en_juego" => "1"
             ]
         ]);
     }
