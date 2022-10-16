@@ -345,7 +345,7 @@ class TorneoController extends Controller
 
     public function getHorariosTorneo($id, $isTorneo){
         $horariosArr = [];
-        if($isTorneo){
+        if($isTorneo == "true"){
             $canchas = Cancha::where('id_torneo',$id)->get();
             foreach($canchas as $cancha) {
                 $horarios = Horario::where('id_cancha', $cancha->id)->where('inicio','>=',Carbon::now()->toDateTimeString())->orderBy('inicio', 'asc')->with('cancha:id,nombre')->get();
