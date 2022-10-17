@@ -20,7 +20,8 @@ class PartidosController extends Controller
                 'horario.cancha:id,nombre',
                 'pareja1:id,nombre',
                 'pareja2:id,nombre',
-                'torneo:id,nombre'
+                'torneo:id,nombre',
+                'jornada:id,numero'
             )->first();
             return response()->json($partidos);
         } catch (\Exception $e) {
@@ -37,7 +38,8 @@ class PartidosController extends Controller
                 'horario.cancha:id,nombre',
                 'pareja1:id,nombre',
                 'pareja2:id,nombre',
-                'torneo:id,nombre'
+                'torneo:id,nombre',
+                'jornada:id,numero'
             )->get();
             return response()->json($partidos);
         } catch (\Exception $e) {
