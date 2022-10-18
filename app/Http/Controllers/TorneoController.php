@@ -311,13 +311,23 @@ class TorneoController extends Controller
 
     public function setHorariosJornada(Request $request)
     {
-        $fecha_inicio = date('Y-m-d H:i', strtotime($request->fecha_inicio));
-        $fecha_fin = date('Y-m-d H:i', strtotime($request->fecha_fin));
-        $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->first();
-        $todos_horarios = true;
+        $torneo = Torneo::where('id', $request->torneo)->with('canchas')->first();
+        $canchas = [];
+        foreach($torneo->canchas as $cancha){
+            array_push($canchas, $cancha->id);
+        }
 
+        $fecha_inicio = date('Y-m-d 00:00', strtotime($request->fecha_inicio));
+        $fecha_fin = date('Y-m-d 23:59', strtotime($request->fecha_fin));
+        $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
+        $todos_horarios = true;
+        $jornada_completa = false;
+        if(count($partidos) == 0){
+            $jornada_completa = true;
+            return response()->json(['message' => 'Jornada completa', 'jornada' => $jornada_completa, 'horarios' => $todos_horarios], 200);
+        }
         foreach ($partidos as $partido) {
-            $horario = Horario::where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
+            $horario = Horario::whereIn('id_cancha',$canchas)->where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
             if ($horario != null) {
                 $partido->horario_id = $horario->id;
                 $partido->save();
@@ -325,10 +335,11 @@ class TorneoController extends Controller
                 $horario->save();
             } else {
                 $todos_horarios = false;
+                break;
             }
         }
 
-        return response()->json($todos_horarios);
+        return response()->json(['message' => 'Horarios asignados', 'jornada' => $jornada_completa, 'horarios' => $todos_horarios]);
     }
 
     /* 
