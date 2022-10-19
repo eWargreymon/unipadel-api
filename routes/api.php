@@ -25,8 +25,11 @@ Route::get('getParejas/{email}', [UserController::class, 'getParejas']);
 Route::post('createTorneo', [TorneoController::class, 'store']);
 Route::post('createInscripcion', [TorneoController::class, 'inscripcion']);
 Route::get('getTorneo/{id?}', [TorneoController::class, 'getTorneo']);
+
 Route::get('getHorariosTorneo/{id}/{isTorneo}', [TorneoController::class, 'getHorariosTorneo']);
+Route::get('getHorariosDisponibles/{id}', [TorneoController::class, 'getHorariosDisponibles']);
 Route::delete('deleteHorario/{horario}', [TorneoController::class, 'deleteHorario']);
+
 Route::get('getCanchaTorneo/{torneo}', [TorneoController::class, 'getCancha']);
 Route::get('getTorneosOrganizador/{organizador}/{estado?}', [TorneoController::class, 'getTorneosOrganizador']);
 Route::get('getTorneosJugador/{jugador}', [TorneoController::class, 'getTorneosJugador']);
@@ -41,6 +44,7 @@ Route::get('getPartido/{id}', [PartidosController::class, 'getPartido']);
 Route::post('getPartidos', [PartidosController::class, 'getPartidos']);
 Route::get('getJornadasTorneo/{torneo}', [PartidosController::class, 'getJornadasTorneo']);
 Route::post('getPartidosTorneo', [PartidosController::class, 'getPartidosTorneo']);
+Route::post('setHorarioPartido', [PartidosController::class, 'setHorarioPartido']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

@@ -76,4 +76,25 @@ class PartidosController extends Controller
         }
         return response()->json($partidos);
     }
+
+    public function setHorarioPartido(Request $request){
+        $new_horario = Horario::find($request->horario);
+        if($new_horario->ocupado != 0){
+            return response()->json(['message' => 'El nuevo horario no se encuentra disponible'], 400);
+        }
+        
+        $partido = Partido::find($request->partido);
+        if($partido->horario_id != null){
+            $old_horario = Horario::find($partido->horario_id);
+            $old_horario->ocupado = 0;
+            $old_horario->save();
+        }
+        
+        $partido->horario_id = $new_horario->id;
+        $partido->save();
+        $new_horario->ocupado = 1;
+        $new_horario->save();
+
+        return response()->json(['message' => 'Horario asignado con éxito'], 200);
+    }
 }

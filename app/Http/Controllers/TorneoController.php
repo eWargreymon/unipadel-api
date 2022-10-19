@@ -313,7 +313,7 @@ class TorneoController extends Controller
     {
         $torneo = Torneo::where('id', $request->torneo)->with('canchas')->first();
         $canchas = [];
-        foreach($torneo->canchas as $cancha){
+        foreach ($torneo->canchas as $cancha) {
             array_push($canchas, $cancha->id);
         }
 
@@ -322,12 +322,12 @@ class TorneoController extends Controller
         $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
         $todos_horarios = true;
         $jornada_completa = false;
-        if(count($partidos) == 0){
+        if (count($partidos) == 0) {
             $jornada_completa = true;
             return response()->json(['message' => 'Jornada completa', 'jornada' => $jornada_completa, 'horarios' => $todos_horarios], 200);
         }
         foreach ($partidos as $partido) {
-            $horario = Horario::whereIn('id_cancha',$canchas)->where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
+            $horario = Horario::whereIn('id_cancha', $canchas)->where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
             if ($horario != null) {
                 $partido->horario_id = $horario->id;
                 $partido->save();
@@ -436,5 +436,18 @@ class TorneoController extends Controller
     {
         $canchas = Cancha::where('id_torneo', $torneo)->get();
         return response()->json($canchas);
+    }
+
+    public function getHorariosDisponibles($id)
+    {
+        $horariosArr = [];
+        $canchas = Cancha::where('id_torneo', $id)->get();
+        foreach ($canchas as $cancha) {
+            $horarios = Horario::where('ocupado', 0)->where('id_cancha', $cancha->id)->where('inicio', '>=', Carbon::now()->toDateTimeString())->orderBy('inicio', 'asc')->with('cancha:id,nombre')->get();
+            foreach ($horarios as $horario) {
+                array_push($horariosArr, $horario);
+            }
+        }
+        return response()->json($horariosArr);
     }
 }
