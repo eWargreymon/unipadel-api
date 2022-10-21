@@ -22,6 +22,8 @@ class CreatePartidosTable extends Migration
             $table->unsignedBigInteger('jornada_id')->nullable();
             $table->unsignedBigInteger('horario_id')->nullable();
             $table->integer('estado')->default(0);
+            $table->integer('propuesta')->nullable();
+            $table->unsignedBigInteger('horario_propuesto')->nullable();
 
             $table->timestamps();
 
@@ -30,6 +32,7 @@ class CreatePartidosTable extends Migration
             $table->foreign('torneo_id')->references('id')->on('torneos')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('horario_id')->references('id')->on('horarios')->onUpdate('cascade')->onDelete('cascade');
             $table->foreign('jornada_id')->references('id')->on('jornadas')->onUpdate('cascade')->onDelete('cascade');
+            $table->foreign('horario_propuesto')->references('id')->on('horarios')->onUpdate('cascade')->onDelete('cascade');
         });
     }
 

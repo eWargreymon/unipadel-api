@@ -10,4 +10,8 @@ class Inscripcion extends Model
     use HasFactory;
 
     protected $table = "inscripciones";
+
+    public function pareja(){
+        return $this->belongsTo(Pareja::class);
+    }
 }

@@ -40,11 +40,13 @@ Route::post('createRecurso', [TorneoController::class, 'createRecurso']);
 Route::post('generateCalendario', [TorneoController::class, 'generateCalendario']);
 Route::post('setHorarios', [TorneoController::class, 'setHorariosJornada']);
 
-Route::get('getPartido/{id}', [PartidosController::class, 'getPartido']);
+Route::get('getPartido/{id}/{torneo?}', [PartidosController::class, 'getPartido']);
 Route::post('getPartidos', [PartidosController::class, 'getPartidos']);
 Route::get('getJornadasTorneo/{torneo}', [PartidosController::class, 'getJornadasTorneo']);
 Route::post('getPartidosTorneo', [PartidosController::class, 'getPartidosTorneo']);
+Route::post('getPartidosTorneoPlayer', [PartidosController::class, 'getPartidosTorneoPlayer']);
 Route::post('setHorarioPartido', [PartidosController::class, 'setHorarioPartido']);
+Route::post('proponerHorarioPartido', [PartidosController::class, 'proponerHorarioPartido']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
