@@ -141,7 +141,6 @@ class PartidosController extends Controller
     }
     
     public function proponerHorarioPartido(Request $request){
-
         $new_horario = Horario::find($request->horario);
         if ($new_horario->ocupado != 0) {
             return response()->json(['message' => 'El nuevo horario no se encuentra disponible'], 400);
@@ -157,7 +156,6 @@ class PartidosController extends Controller
         
         $partido->propuesta = $pareja_torneo->id;
         $partido->horario_propuesto = $request->horario;
-
         $partido->save();
 
         return response()->json(['message' => 'Horario propuesto con éxito'], 200);
