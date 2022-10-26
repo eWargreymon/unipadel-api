@@ -47,6 +47,8 @@ Route::post('getPartidosTorneo', [PartidosController::class, 'getPartidosTorneo'
 Route::post('getPartidosTorneoPlayer', [PartidosController::class, 'getPartidosTorneoPlayer']);
 Route::post('setHorarioPartido', [PartidosController::class, 'setHorarioPartido']);
 Route::post('proponerHorarioPartido', [PartidosController::class, 'proponerHorarioPartido']);
+Route::get('aceptarPropuesta/{partido}', [PartidosController::class, 'aceptarPropuesta']);
+Route::get('rechazarPropuesta/{partido}', [PartidosController::class, 'rechazarPropuesta']);
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();

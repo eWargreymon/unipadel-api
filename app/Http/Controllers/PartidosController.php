@@ -108,14 +108,25 @@ class PartidosController extends Controller
         }
 
         $parejas = Integrante::where('id_jugador', $request->jugador)->select('id_pareja')->get()->pluck('id_pareja')->toArray();
+        $partidos_conflicto = [];
         foreach ($partidos as $partido){
             if(in_array($partido->p1, $parejas) || (in_array($partido->p2, $parejas))){
                 $partido->propio = true;
+                if($partido->propuesta != null){
+                    $horario_propuesto = Horario::find($partido->horario_propuesto)->inicio;
+                    $partido->fechor_propuesta = $horario_propuesto;
+                    if(in_array($partido->propuesta, $parejas)){
+                        $partido->propuesta_externa = false;
+                    } else {
+                        $partido->propuesta_externa = true;
+                    }
+                    array_push($partidos_conflicto, $partido);
+                }
             } else {
                 $partido->propio = false;
             }
         }
-        return response()->json($partidos);
+        return response()->json(['partidos'=>$partidos, 'partidos_conflicto'=>$partidos_conflicto], 200);
     }
 
     public function setHorarioPartido(Request $request)
@@ -151,6 +162,12 @@ class PartidosController extends Controller
         
         $partido = Partido::find($request->partido);
 
+        if(isset($partido->horario_propuesto)){
+            $horario_previo = Horario::find($partido->horario_propuesto);
+            $horario_previo->ocupado = 0;
+            $horario_previo->save();
+        }
+
         $parejas = Integrante::where('id_jugador', $request->user)->select('id_pareja')->get()->pluck('id_pareja')->toArray();
         $pareja_torneo = Inscripcion::whereIn('pareja_id', $parejas)->where('torneo_id', $partido->torneo_id)->first();
         
@@ -159,5 +176,32 @@ class PartidosController extends Controller
         $partido->save();
 
         return response()->json(['message' => 'Horario propuesto con éxito'], 200);
+    }
+
+    public function aceptarPropuesta($p){
+        $partido = Partido::find($p);
+
+        if($partido->horario_id != null){
+            $horario_actual = Horario::find($partido->horario_id);
+            $horario_actual->ocupado = 0;
+            $horario_actual->save();
+        }
+
+        $partido->horario_id = $partido->horario_propuesto;
+        $partido->propuesta = null;
+        $partido->horario_propuesto = null;
+        $partido->save();
+    }
+
+    public function rechazarPropuesta($p){
+        $partido = Partido::find($p);
+
+        $nuevo_horario = Horario::find($partido->horario_propuesto);
+        $nuevo_horario->ocupado = 0;
+        $nuevo_horario->save();
+
+        $partido->propuesta = null;
+        $partido->horario_propuesto = null;
+        $partido->save();
     }
 }
