@@ -134,10 +134,13 @@ class TorneoController extends Controller
         $cancha->save();
 
         $torneo = Torneo::where('id', $request->torneo)->first();
-        $fecha_inicio = strtotime($torneo->fecha_inicio);
-        $fecha_fin = strtotime($torneo->fecha_fin);
+        $fecha_inicio_torneo = strtotime($torneo->fecha_inicio);
+        $fecha_fin_torneo = strtotime($torneo->fecha_fin);
 
         foreach ($request->horarios as $h) {
+
+            $fecha_inicio = strtotime($h['fechaInicio']);
+            $fecha_fin = strtotime($h['fechaFin']);
 
             $turno = $this->getDuracionTurno($h['inicio'], $h['fin'], $h['turnos']);
 
@@ -146,43 +149,43 @@ class TorneoController extends Controller
             $horarios = [];
 
             if ($h['lunes']) {
-                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'monday');
+                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'monday', $fecha_inicio_torneo, $fecha_fin_torneo);
                 foreach ($recursos as $recurso) {
                     array_push($horarios, $recurso);
                 }
             }
             if ($h['martes']) {
-                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'tuesday');
+                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'tuesday', $fecha_inicio_torneo, $fecha_fin_torneo);
                 foreach ($recursos as $recurso) {
                     array_push($horarios, $recurso);
                 }
             }
             if ($h['miercoles']) {
-                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'wednesday');
+                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'wednesday', $fecha_inicio_torneo, $fecha_fin_torneo);
                 foreach ($recursos as $recurso) {
                     array_push($horarios, $recurso);
                 }
             }
             if ($h['jueves']) {
-                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'thursday');
+                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'thursday', $fecha_inicio_torneo, $fecha_fin_torneo);
                 foreach ($recursos as $recurso) {
                     array_push($horarios, $recurso);
                 }
             }
             if ($h['viernes']) {
-                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'friday');
+                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'friday', $fecha_inicio_torneo, $fecha_fin_torneo);
                 foreach ($recursos as $recurso) {
                     array_push($horarios, $recurso);
                 }
             }
             if ($h['sabado']) {
-                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'saturday');
+                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'saturday', $fecha_inicio_torneo, $fecha_fin_torneo);
                 foreach ($recursos as $recurso) {
                     array_push($horarios, $recurso);
                 }
             }
             if ($h['domingo']) {
-                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'sunday');
+                $recursos = $this->createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, 'sunday', $fecha_inicio_torneo, $fecha_fin_torneo);
                 foreach ($recursos as $recurso) {
                     array_push($horarios, $recurso);
                 }
@@ -199,13 +202,15 @@ class TorneoController extends Controller
     }
 
     // Crea recursos para el día indicado entre las fechas de inicio y fin del torneo
-    public function createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, $dia)
+    public function createRecursosDay($fecha_inicio, $fecha_fin, $hora, $turnos, $turno, $dia, $fecha_inicio_torneo, $fecha_fin_torneo)
     {
         $horarios = [];
         for ($fecha_inicio; $fecha_inicio <= $fecha_fin; $fecha_inicio = strtotime("+7 day", $fecha_inicio)) {
             $next_day = strtotime($dia, $fecha_inicio);
 
+            if($next_day < $fecha_inicio_torneo) continue;
             if ($next_day > $fecha_fin) break;
+            if ($next_day > $fecha_fin_torneo) break;
 
             $inicio = strtotime(date('d-m-Y', $next_day) . ' ' . $hora);
 
