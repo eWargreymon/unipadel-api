@@ -12,6 +12,7 @@ use App\Models\Pareja;
 use App\Models\Integrante;
 use App\Models\Jornada;
 use App\Models\Partido;
+use App\Models\PreferenciaInscripcion;
 use Carbon\Carbon;
 
 class TorneoController extends Controller
@@ -91,9 +92,26 @@ class TorneoController extends Controller
                 $inscripcion->torneo_id = $torneo->id;
                 $inscripcion->save();
 
+                foreach ($request->horarios as $horario) {
+                    $preferencias = new PreferenciaInscripcion();
+                    $preferencias->inscripcion_id = $inscripcion->id;
+                    if ($horario['todo_dia'] == true) {
+                        $preferencias->todo_dia = 1;
+                    } else {
+                        $preferencias->inicio = $horario['inicio'];
+                        $preferencias->fin = $horario['fin'];
+                    }
+                    $preferencias->mon = $horario['lunes'];
+                    $preferencias->tue = $horario['martes'];
+                    $preferencias->wed = $horario['miercoles'];
+                    $preferencias->thu = $horario['jueves'];
+                    $preferencias->fri = $horario['viernes'];
+                    $preferencias->sat = $horario['sabado'];
+                    $preferencias->sun = $horario['domingo'];
+                    $preferencias->save();
+                }
                 return response()->json(['message' => 'Inscripción registrada'], 200);
             } else {
-
                 return response()->json(['message' => 'El torneo se encuentra lleno'], 500);
             }
         } catch (\Exception $e) {
@@ -208,7 +226,7 @@ class TorneoController extends Controller
         for ($fecha_inicio; $fecha_inicio <= $fecha_fin; $fecha_inicio = strtotime("+7 day", $fecha_inicio)) {
             $next_day = strtotime($dia, $fecha_inicio);
 
-            if($next_day < $fecha_inicio_torneo) continue;
+            if ($next_day < $fecha_inicio_torneo) continue;
             if ($next_day > $fecha_fin) break;
             if ($next_day > $fecha_fin_torneo) break;
 
@@ -331,6 +349,13 @@ class TorneoController extends Controller
             $jornada_completa = true;
             return response()->json(['message' => 'Jornada completa', 'jornada' => $jornada_completa, 'horarios' => $todos_horarios], 200);
         }
+
+        $this->asignarHorariosPreferencias($partidos, $canchas, $fecha_inicio, $fecha_fin);
+        $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
+        if (count($partidos) == 0) {
+            $jornada_completa = true;
+            return response()->json(['message' => 'Horarios asignados', 'jornada' => $jornada_completa, 'horarios' => $todos_horarios]);
+        }
         foreach ($partidos as $partido) {
             $horario = Horario::whereIn('id_cancha', $canchas)->where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
             if ($horario != null) {
@@ -345,6 +370,51 @@ class TorneoController extends Controller
         }
 
         return response()->json(['message' => 'Horarios asignados', 'jornada' => $jornada_completa, 'horarios' => $todos_horarios]);
+    }
+
+    public function asignarHorariosPreferencias($partidos, $canchas, $fecha_inicio, $fecha_fin)
+    {
+        foreach ($partidos as $partido) {
+            $inscripcion1 = Inscripcion::where('torneo_id', $partido->torneo_id)->where('pareja_id', $partido->p1)->first();
+            $inscripcion2 = Inscripcion::where('torneo_id', $partido->torneo_id)->where('pareja_id', $partido->p2)->first();
+            $preferencias1 = PreferenciaInscripcion::where('inscripcion_id', $inscripcion1->id)->get();
+            $preferencias2 = PreferenciaInscripcion::where('inscripcion_id', $inscripcion2->id)->get();
+            $horarios = Horario::whereIn('id_cancha', $canchas)->where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->get();
+            if ($horarios != null) {
+                $horario_encontrado_prov = false;
+                $horario_encontrado = false;
+                foreach ($horarios as $horario) {
+                    $dia = substr(strtolower(date('l', strtotime($horario->inicio))), 0, 3);
+                    foreach ($preferencias1 as $preferencia) {
+                        if ($preferencia->$dia) {
+                            if ($preferencia->inicio <= date('H:m:s', strtotime($horario->inicio)) && date('H:m:s', strtotime($horario->inicio)) <= $preferencia->fin) {
+                                // dd("Este horario cuadra con el dia y la hora para la pareja 1", $horario, $preferencia);
+                                $horario_encontrado_prov = true;
+                                break;
+                            }
+                        }
+                    }
+                    if ($horario_encontrado_prov) {
+                        foreach ($preferencias2 as $preferencia) {
+                            if ($preferencia->$dia) {
+                                if ($preferencia->inicio <= date('H:m:s', strtotime($horario->inicio)) && date('H:m:s', strtotime($horario->inicio)) <= $preferencia->fin) {
+                                    // dd("Este horario cuadra con el dia y la hora para la pareja 2 y, por lo tanto, para ambas parejas", $horario, $preferencia);
+                                    $partido->horario_id = $horario->id;
+                                    $partido->save();
+                                    $horario->ocupado = 1;
+                                    $horario->save();
+                                    $horario_encontrado = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if ($horario_encontrado) {
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /* 
