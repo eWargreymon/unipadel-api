@@ -80,6 +80,11 @@ class TorneoController extends Controller
         try {
             $torneo = Torneo::findOrFail($request->torneo);
 
+            $valid = $this->checkInscripcion($request->pareja, $torneo->id);
+            if(!$valid){
+                return response()->json(['message' => 'Algún integrante de la pareja ya se encuentra inscrito en el torneo'], 500);
+            }
+
             if (Inscripcion::where('pareja_id', $request->pareja)->where('torneo_id', $torneo->id)->first() != null) {
                 return response()->json(['message' => 'Ya existe una inscripción de la pareja para este torneo'], 500);
             }
@@ -93,6 +98,7 @@ class TorneoController extends Controller
                 $inscripcion->save();
 
                 foreach ($request->horarios as $horario) {
+
                     $preferencias = new PreferenciaInscripcion();
                     $preferencias->inscripcion_id = $inscripcion->id;
                     if ($horario['todo_dia'] == true) {
@@ -115,8 +121,21 @@ class TorneoController extends Controller
                 return response()->json(['message' => 'El torneo se encuentra lleno'], 500);
             }
         } catch (\Exception $e) {
-            return response()->json(['message' => 'Error en la inscripción', 'error' => $e->getMessage(),], 500);
+            return response()->json(['message' => 'Se ha producido un error en la inscripción. Por favor, inténtelo más tarde.', 'error' => $e->getMessage(),], 500);
         }
+    }
+
+    public function checkInscripcion($pareja, $torneo){
+        $integrantes = Integrante::where('id_pareja', $pareja)->get();
+        
+        foreach($integrantes as $integrante){
+            $parejas = Integrante::where('id_jugador', $integrante->id_jugador)->get()->pluck('id_pareja');
+            $inscripciones = Inscripcion::where('torneo_id', $torneo)->whereIn('pareja_id', $parejas)->get();
+            if(count($inscripciones) != 0){
+                return false;
+            }
+        }
+        return true;
     }
 
     public function getInscripciones($torneo)
