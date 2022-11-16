@@ -372,10 +372,13 @@ class TorneoController extends Controller
         }
 
         $this->asignarHorariosPreferencias($partidos, $canchas, $fecha_inicio, $fecha_fin);
+        // dd("stopped");
 
         $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
         
         $this->asignarHorariosPreferenciasParcial($partidos, $canchas, $fecha_inicio, $fecha_fin);
+
+        // dd("stopped");
 
         $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
         if (count($partidos) == 0) {
@@ -471,6 +474,8 @@ class TorneoController extends Controller
                 foreach ($horarios as $horario) {
                     $dia = substr(strtolower(date('l', strtotime($horario->inicio))), 0, 3);
                     $orden = rand(0, 1);
+                    $acierto = false;
+
                     if ($orden == 1) {
                         foreach ($preferencias1 as $preferencia) {
                             if ($preferencia->$dia == 1) {
@@ -479,6 +484,7 @@ class TorneoController extends Controller
                                     $partido->save();
                                     $horario->ocupado = 1;
                                     $horario->save();
+                                    $acierto = true;
                                     break;
                                 } else {
                                     if ($preferencia->inicio <= date('H:i:s', strtotime($horario->inicio)) && date('H:i:s', strtotime($horario->inicio)) <= $preferencia->fin) {
@@ -486,6 +492,7 @@ class TorneoController extends Controller
                                         $partido->save();
                                         $horario->ocupado = 1;
                                         $horario->save();
+                                        $acierto = true;
                                         break;
                                     }
                                 }
@@ -499,6 +506,7 @@ class TorneoController extends Controller
                                     $partido->save();
                                     $horario->ocupado = 1;
                                     $horario->save();
+                                    $acierto = true;
                                     break;
                                 } else {
                                     if ($preferencia->inicio <= date('H:i:s', strtotime($horario->inicio)) && date('H:i:s', strtotime($horario->inicio)) <= $preferencia->fin) {
@@ -506,12 +514,15 @@ class TorneoController extends Controller
                                         $partido->save();
                                         $horario->ocupado = 1;
                                         $horario->save();
+                                        $acierto = true;
                                         break;
                                     }
                                 }
                             }
                         }
                     }
+
+                    if($acierto) break;
 
                     if ($orden == 1) {
                         foreach ($preferencias2 as $preferencia) {
@@ -521,6 +532,7 @@ class TorneoController extends Controller
                                     $partido->save();
                                     $horario->ocupado = 1;
                                     $horario->save();
+                                    $acierto = true;
                                     break;
                                 } else {
                                     if ($preferencia->inicio <= date('H:i:s', strtotime($horario->inicio)) && date('H:i:s', strtotime($horario->inicio)) <= $preferencia->fin) {
@@ -529,6 +541,7 @@ class TorneoController extends Controller
                                         $partido->save();
                                         $horario->ocupado = 1;
                                         $horario->save();
+                                        $acierto = true;
                                         break;
                                     }
                                 }
@@ -542,6 +555,7 @@ class TorneoController extends Controller
                                     $partido->save();
                                     $horario->ocupado = 1;
                                     $horario->save();
+                                    $acierto = true;
                                     break;
                                 } else {
                                     if ($preferencia->inicio <= date('H:i:s', strtotime($horario->inicio)) && date('H:i:s', strtotime($horario->inicio)) <= $preferencia->fin) {
@@ -550,12 +564,15 @@ class TorneoController extends Controller
                                         $partido->save();
                                         $horario->ocupado = 1;
                                         $horario->save();
+                                        $acierto = true;
                                         break;
                                     }
                                 }
                             }
                         }
                     }
+                    
+                    if($acierto) break;
                 }
             }
         }
