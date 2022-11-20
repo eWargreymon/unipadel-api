@@ -334,6 +334,7 @@ class TorneoController extends Controller
         }
 
         $torneo->calendario_generado = 1;
+        $torneo->estado = 1;
         $torneo->save();
 
         return response()->json(['message' => 'Calendario de jornadas generado'], 200);
@@ -403,7 +404,6 @@ class TorneoController extends Controller
 
     public function asignarHorariosPreferencias($partidos, $canchas, $fecha_inicio, $fecha_fin)
     {
-        // dd($partidos, $canchas, $fecha_inicio, $fecha_fin);
         foreach ($partidos as $partido) {
             $inscripcion1 = Inscripcion::where('torneo_id', $partido->torneo_id)->where('pareja_id', $partido->p1)->first();
             $inscripcion2 = Inscripcion::where('torneo_id', $partido->torneo_id)->where('pareja_id', $partido->p2)->first();
@@ -412,14 +412,12 @@ class TorneoController extends Controller
             $horarios = Horario::whereIn('id_cancha', $canchas)->where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->get();
             if ($horarios != null) {
                 foreach ($horarios as $horario) {
-
                     $horario_encontrado_prov = false;
                     $horario_encontrado = false;
                     $dia = substr(strtolower(date('l', strtotime($horario->inicio))), 0, 3);
                     foreach ($preferencias1 as $preferencia) {
                         if ($preferencia->$dia == 1) {
                             if ($preferencia->todo_dia == 1) {
-                                // dd("Este horario cuadra con el dia para la pareja 1");
                                 $horario_encontrado_prov = true;
                                 break;
                             } else {
