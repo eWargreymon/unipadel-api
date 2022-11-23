@@ -112,15 +112,27 @@ class PartidosController extends Controller
         foreach ($partidos as $partido){
             if(in_array($partido->p1, $parejas) || (in_array($partido->p2, $parejas))){
                 $partido->propio = true;
-                if($partido->propuesta != null){
-                    $horario_propuesto = Horario::find($partido->horario_propuesto)->inicio;
-                    $partido->fechor_propuesta = $horario_propuesto;
-                    if(in_array($partido->propuesta, $parejas)){
-                        $partido->propuesta_externa = false;
-                    } else {
-                        $partido->propuesta_externa = true;
+                if($partido->estado == 1){
+                    if($partido->pareja_propuesta_resultado != null){
+                        $resultado_propuesto = "".$partido->pareja1->nombre." ".$partido->puntos_p1." - ".$partido->puntos_p2." ".$partido->pareja2->nombre;                        
+                        $partido->resultado_propuesto = $resultado_propuesto;
+                        if(in_array($partido->pareja_propuesta_resultado, $parejas)){
+                            $partido->propuesta_externa = false;
+                        } else {
+                            $partido->propuesta_externa = true;
+                        }
                     }
-                    array_push($partidos_conflicto, $partido);
+                } else {
+                    if($partido->propuesta != null){
+                        $horario_propuesto = Horario::find($partido->horario_propuesto)->inicio;
+                        $partido->fechor_propuesta = $horario_propuesto;
+                        if(in_array($partido->propuesta, $parejas)){
+                            $partido->propuesta_externa = false;
+                        } else {
+                            $partido->propuesta_externa = true;
+                        }
+                        array_push($partidos_conflicto, $partido);
+                    }
                 }
             } else {
                 $partido->propio = false;
@@ -151,7 +163,8 @@ class PartidosController extends Controller
         return response()->json(['message' => 'Horario asignado con éxito'], 200);
     }
     
-    public function proponerHorarioPartido(Request $request){
+    public function proponerHorarioPartido(Request $request)
+    {
         $new_horario = Horario::find($request->horario);
         if ($new_horario->ocupado != 0) {
             return response()->json(['message' => 'El nuevo horario no se encuentra disponible'], 400);
@@ -178,7 +191,8 @@ class PartidosController extends Controller
         return response()->json(['message' => 'Horario propuesto con éxito'], 200);
     }
 
-    public function aceptarPropuesta($p){
+    public function aceptarPropuesta($p)
+    {
         $partido = Partido::find($p);
 
         if($partido->horario_id != null){
@@ -193,7 +207,8 @@ class PartidosController extends Controller
         $partido->save();
     }
 
-    public function rechazarPropuesta($p){
+    public function rechazarPropuesta($p)
+    {
         $partido = Partido::find($p);
 
         $nuevo_horario = Horario::find($partido->horario_propuesto);
@@ -202,6 +217,44 @@ class PartidosController extends Controller
 
         $partido->propuesta = null;
         $partido->horario_propuesto = null;
+        $partido->save();
+    }
+    
+    public function proponerResultadoPartido(Request $request)
+    {
+
+        $partido = Partido::find($request->partido);
+
+        $partido->estado = 1;
+        $partido->puntos_p1 = $request->puntos1;
+        $partido->puntos_p2 = $request->puntos2;
+        $parejas = Integrante::where('id_jugador', $request->user)->select('id_pareja')->get()->pluck('id_pareja')->toArray();
+        $pareja_torneo = Inscripcion::whereIn('pareja_id', $parejas)->where('torneo_id', $partido->torneo_id)->first();
+        $partido->pareja_propuesta_resultado = $pareja_torneo->id;
+        $partido->save();
+
+        return response()->json(['message' => 'Resultado propuesto con éxito'], 200);
+    }
+
+    public function aceptarResultado($p)
+    {
+        $partido = Partido::find($p);
+
+        $partido->pareja_propuesta_resultado = null;
+        $partido->estado = 2;
+        
+        $partido->save();
+    }
+
+    public function rechazarResultado($p)
+    {
+        $partido = Partido::find($p);
+
+        $partido->pareja_propuesta_resultado = null;
+        $partido->puntos_p1 = 0;
+        $partido->puntos_p2 = 0;
+        $partido->estado = 0;
+
         $partido->save();
     }
 }

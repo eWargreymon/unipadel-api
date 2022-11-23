@@ -22,6 +22,9 @@ class CreatePartidosTable extends Migration
             $table->unsignedBigInteger('jornada_id')->nullable();
             $table->unsignedBigInteger('horario_id')->nullable();
             $table->integer('estado')->default(0);
+            $table->integer('puntos_p1')->default(0);
+            $table->integer('puntos_p2')->default(0);
+            $table->integer('pareja_propuesta_resultado')->nullable();
             $table->integer('propuesta')->nullable();
             $table->unsignedBigInteger('horario_propuesto')->nullable();
 

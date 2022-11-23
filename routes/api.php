@@ -50,6 +50,10 @@ Route::post('proponerHorarioPartido', [PartidosController::class, 'proponerHorar
 Route::get('aceptarPropuesta/{partido}', [PartidosController::class, 'aceptarPropuesta']);
 Route::get('rechazarPropuesta/{partido}', [PartidosController::class, 'rechazarPropuesta']);
 
+Route::post('proponerResultadoPartido', [PartidosController::class, 'proponerResultadoPartido']);
+Route::get('aceptarResultado/{partido}', [PartidosController::class, 'aceptarResultado']);
+Route::get('rechazarResultado/{partido}', [PartidosController::class, 'rechazarResultado']);
+
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
