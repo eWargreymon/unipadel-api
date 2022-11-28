@@ -8,6 +8,7 @@ use App\Models\Integrante;
 use App\Models\Jornada;
 use App\Models\Partido;
 use Illuminate\Http\Request;
+use PhpParser\Node\Expr\Instanceof_;
 
 class PartidosController extends Controller
 {
@@ -225,7 +226,7 @@ class PartidosController extends Controller
 
         $partido = Partido::find($request->partido);
 
-        $partido->estado = 1;
+        $partido->estado = 2;
         $partido->puntos_p1 = $request->puntos1;
         $partido->puntos_p2 = $request->puntos2;
         $parejas = Integrante::where('id_jugador', $request->user)->select('id_pareja')->get()->pluck('id_pareja')->toArray();
@@ -233,7 +234,32 @@ class PartidosController extends Controller
         $partido->pareja_propuesta_resultado = $pareja_torneo->id;
         $partido->save();
 
+        $this->guardarResultado($partido->p1, $partido->p2, $partido->puntos_p1, $partido->puntos_p2, $partido->torneo_id);
+
         return response()->json(['message' => 'Resultado propuesto con éxito'], 200);
+    }
+
+    public function guardarResultado($pareja1, $pareja2, $puntos1, $puntos2, $torneo){
+        $inscripcion1 = Inscripcion::where('pareja_id', $pareja1)->where('torneo_id', $torneo)->first();
+        $inscripcion2 = Inscripcion::where('pareja_id', $pareja2)->where('torneo_id', $torneo)->first();
+
+        if($puntos1 > $puntos2){
+            $inscripcion1->p_ganados = $inscripcion1->p_ganados+1;
+            $inscripcion2->p_perdidos = $inscripcion2->p_perdidos+1;
+        } else {
+            $inscripcion2->p_ganados = $inscripcion2->p_ganados+1;
+            $inscripcion1->p_perdidos = $inscripcion1->p_perdidos+1;
+        }
+        $inscripcion1->p_jugados = $inscripcion1->p_jugados+1;
+        $inscripcion1->s_ganados = $inscripcion1->s_ganados + $puntos1;
+        $inscripcion1->s_perdidos = $inscripcion1->s_perdidos + $puntos2;
+        
+        $inscripcion2->p_jugados = $inscripcion2->p_jugados+1;
+        $inscripcion2->s_ganados = $inscripcion2->s_ganados + $puntos2;
+        $inscripcion2->s_perdidos = $inscripcion2->s_perdidos + $puntos1;
+
+        $inscripcion1->update();
+        $inscripcion2->update();
     }
 
     public function aceptarResultado($p)

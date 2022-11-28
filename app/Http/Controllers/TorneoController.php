@@ -163,6 +163,16 @@ class TorneoController extends Controller
         return response()->json($equipos);
     }
 
+    public function getResultados($torneo)
+    {
+        $inscripciones = Inscripcion::where('torneo_id', $torneo)
+        ->with('pareja')
+        ->orderBy('p_ganados', 'desc')
+        ->orderByRaw('(s_ganados - s_perdidos) desc')
+        ->get();
+        return response()->json($inscripciones);
+    }
+
 
     public function createRecurso(Request $request)
     {
@@ -373,13 +383,10 @@ class TorneoController extends Controller
         }
 
         $this->asignarHorariosPreferencias($partidos, $canchas, $fecha_inicio, $fecha_fin);
-        // dd("stopped");
 
         $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
         
         $this->asignarHorariosPreferenciasParcial($partidos, $canchas, $fecha_inicio, $fecha_fin);
-
-        // dd("stopped");
 
         $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
         if (count($partidos) == 0) {

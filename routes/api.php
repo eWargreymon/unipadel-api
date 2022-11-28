@@ -34,6 +34,7 @@ Route::get('getCanchaTorneo/{torneo}', [TorneoController::class, 'getCancha']);
 Route::get('getTorneosOrganizador/{organizador}/{estado?}', [TorneoController::class, 'getTorneosOrganizador']);
 Route::get('getTorneosJugador/{jugador}', [TorneoController::class, 'getTorneosJugador']);
 Route::get('getInscripciones/{torneo}', [TorneoController::class, 'getInscripciones']);
+Route::get('getResultados/{torneo}', [TorneoController::class, 'getResultados']);
 Route::post('validatePareja', [TorneoController::class, 'validatePareja']);
 
 Route::post('createRecurso', [TorneoController::class, 'createRecurso']);

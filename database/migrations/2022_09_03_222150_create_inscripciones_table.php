@@ -19,6 +19,11 @@ class CreateInscripcionesTable extends Migration
             $table->unsignedBigInteger('torneo_id');
             $table->unsignedBigInteger('pareja_id');
             $table->boolean('validated')->default(0);
+            $table->integer('p_jugados')->default(0);
+            $table->integer('p_ganados')->default(0);
+            $table->integer('p_perdidos')->default(0);
+            $table->integer('s_ganados')->default(0);
+            $table->integer('s_perdidos')->default(0);
 
             $table->timestamps();
 
