@@ -16,62 +16,7 @@ class ParejasSeeder extends Seeder
     {
         DB::table('parejas')->insert([
             [
-                "nombre" => "Los Pollos Hermanos"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "Cracks"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "Los Pepes"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "D"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "E"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "F"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "G"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "H"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "I"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "J"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "K"
-            ]
-        ]);
-        DB::table('parejas')->insert([
-            [
-                "nombre" => "L"
+                "nombre" => "Pareja 1"
             ]
         ]);
 
@@ -79,6 +24,73 @@ class ParejasSeeder extends Seeder
             [
                 "id_pareja" => "1",
                 "id_jugador" => "3",
+            ]
+        ]);
+
+        DB::table('integrantes')->insert([
+            [
+                "id_pareja" => "1",
+                "id_jugador" => "4",
+            ]
+        ]);
+
+        DB::table('parejas')->insert([
+            [
+                "nombre" => "Pareja 2"
+            ]
+        ]);
+
+        DB::table('integrantes')->insert([
+            [
+                "id_pareja" => "2",
+                "id_jugador" => "5",
+            ]
+        ]);
+
+        DB::table('integrantes')->insert([
+            [
+                "id_pareja" => "2",
+                "id_jugador" => "6",
+            ]
+        ]);
+
+        DB::table('parejas')->insert([
+            [
+                "nombre" => "Pareja 3"
+            ]
+        ]);
+
+        DB::table('integrantes')->insert([
+            [
+                "id_pareja" => "3",
+                "id_jugador" => "7",
+            ]
+        ]);
+
+        DB::table('integrantes')->insert([
+            [
+                "id_pareja" => "3",
+                "id_jugador" => "8",
+            ]
+        ]);
+
+        DB::table('parejas')->insert([
+            [
+                "nombre" => "Pareja 4"
+            ]
+        ]);
+
+        DB::table('integrantes')->insert([
+            [
+                "id_pareja" => "4",
+                "id_jugador" => "9",
+            ]
+        ]);
+
+        DB::table('integrantes')->insert([
+            [
+                "id_pareja" => "4",
+                "id_jugador" => "10",
             ]
         ]);
     }

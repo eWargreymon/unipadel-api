@@ -19,27 +19,62 @@ class UserSeeder extends Seeder
             [
                 [
                     'name' => 'Organizador 1',
-                    'email' => 'o@o.com',
+                    'email' => 'organizador@unipadel.com',
                     'tipo' => 1
                 ],
                 [
                     'name' => 'Organizador 2',
-                    'email' => 'o1@o.com',
+                    'email' => 'admin@organizador.com',
                     'tipo' => 1
                 ],
                 [
                     'name' => 'Jugador 1',
-                    'email' => 'j@j.com',
-                    'tipo' => 0
-                ],
-                [
-                    'name' => 'Jugador 2',
-                    'email' => 'j1@j.com',
+                    'email' => 'jugador1@unipadel.com',
                     'tipo' => 0
                 ],
                 [
                     'name' => 'Jugador 3',
-                    'email' => 'j2@j.com',
+                    'email' => 'j1@j.com',
+                    'tipo' => 0
+                ],
+                [
+                    'name' => 'Jugador 2',
+                    'email' => 'jugador2@unipadel.com',
+                    'tipo' => 0
+                ],
+                [
+                    'name' => 'Jugador 4',
+                    'email' => 'j4@j.com',
+                    'tipo' => 0
+                ],
+                [
+                    'name' => 'Jugador 5',
+                    'email' => 'j5@j.com',
+                    'tipo' => 0
+                ],
+                [
+                    'name' => 'Jugador 6',
+                    'email' => 'j6@j.com',
+                    'tipo' => 0
+                ],
+                [
+                    'name' => 'Jugador 7',
+                    'email' => 'j7@j.com',
+                    'tipo' => 0
+                ],
+                [
+                    'name' => 'Jugador 8',
+                    'email' => 'j8@j.com',
+                    'tipo' => 0
+                ],
+                [
+                    'name' => 'Jugador 9',
+                    'email' => 'j9@j.com',
+                    'tipo' => 0
+                ],
+                [
+                    'name' => 'Jugador 10',
+                    'email' => 'j10@j.com',
                     'tipo' => 0
                 ]
             ]

@@ -38,29 +38,5 @@ class InscripcionesSeeder extends Seeder
                 "torneo_id" => 1,
             ]
         ]);
-        DB::table('inscripciones')->insert([
-            [
-                "pareja_id" => 5,
-                "torneo_id" => 1,
-            ]
-        ]);
-        DB::table('inscripciones')->insert([
-            [
-                "pareja_id" => 6,
-                "torneo_id" => 1,
-            ]
-        ]);
-        DB::table('inscripciones')->insert([
-            [
-                "pareja_id" => 7,
-                "torneo_id" => 1,
-            ]
-        ]);
-        DB::table('inscripciones')->insert([
-            [
-                "pareja_id" => 8,
-                "torneo_id" => 1,
-            ]
-        ]);
     }
 }

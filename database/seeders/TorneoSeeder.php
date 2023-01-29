@@ -16,16 +16,16 @@ class TorneoSeeder extends Seeder
     {
         DB::table('torneos')->insert([
             [
-                "estado" => 1,
+                "estado" => 0,
                 "ciudad" => "Las Palmas de Gran Canaria",
                 "club" => "Club Sánchez",
                 "descripcion" => "Descripción de prueba del torneo",
-                "fecha_fin" => "2022-12-23",
-                "fecha_inicio" => "2022-11-19",
-                "fecha_limite" => "2022-11-15",
+                "fecha_fin" => "2023-05-23",
+                "fecha_inicio" => "2023-02-19",
+                "fecha_limite" => "2023-01-15",
                 "formato" => 1,
                 "max_parejas" => "12",
-                "nombre" => "Torneo del Rector 2022",
+                "nombre" => "Torneo de prueba",
                 "organizador_id" => "1",
                 "precio" => "12",
             ]
@@ -36,15 +36,14 @@ class TorneoSeeder extends Seeder
                 "ciudad" => "Las Palmas de Gran Canaria",
                 "club" => "Club Sánchez",
                 "descripcion" => "Descripción de prueba del torneo",
-                "fecha_fin" => "2022-12-30",
-                "fecha_inicio" => "2022-11-20",
-                "fecha_limite" => "2022-11-15",
+                "fecha_fin" => "2023-12-30",
+                "fecha_inicio" => "2023-11-20",
+                "fecha_limite" => "2023-11-15",
                 "formato" => 1,
                 "max_parejas" => "12",
-                "nombre" => "Triangular Doble FFP",
+                "nombre" => "Otras pruebas",
                 "organizador_id" => "1",
                 "precio" => "12",
-                // "en_juego" => "1"
             ]
         ]);
     }
