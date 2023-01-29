@@ -185,7 +185,7 @@ class PartidosController extends Controller
         $parejas = Integrante::where('id_jugador', $request->user)->select('id_pareja')->get()->pluck('id_pareja')->toArray();
         $pareja_torneo = Inscripcion::whereIn('pareja_id', $parejas)->where('torneo_id', $partido->torneo_id)->first();
         
-        $partido->propuesta = $pareja_torneo->id;
+        $partido->propuesta = $pareja_torneo->pareja_id;
         $partido->horario_propuesto = $request->horario;
         $partido->save();
 
@@ -221,20 +221,34 @@ class PartidosController extends Controller
         $partido->save();
     }
     
+    public function asignarResultadoPartido(Request $request)
+    {
+
+        $partido = Partido::find($request->partido);
+        $partido->estado = 2;
+        $partido->puntos_p1 = $request->puntos1;
+        $partido->puntos_p2 = $request->puntos2;
+        $partido->save();
+
+        $this->guardarResultado($partido->p1, $partido->p2, $partido->puntos_p1, $partido->puntos_p2, $partido->torneo_id);
+
+        return response()->json(['message' => 'Resultado asignado con éxito'], 200);
+    }
+    
     public function proponerResultadoPartido(Request $request)
     {
 
         $partido = Partido::find($request->partido);
 
-        $partido->estado = 2;
+        $partido->estado = 1;
         $partido->puntos_p1 = $request->puntos1;
         $partido->puntos_p2 = $request->puntos2;
         $parejas = Integrante::where('id_jugador', $request->user)->select('id_pareja')->get()->pluck('id_pareja')->toArray();
         $pareja_torneo = Inscripcion::whereIn('pareja_id', $parejas)->where('torneo_id', $partido->torneo_id)->first();
-        $partido->pareja_propuesta_resultado = $pareja_torneo->id;
+        $partido->pareja_propuesta_resultado = $pareja_torneo->pareja_id;
         $partido->save();
 
-        $this->guardarResultado($partido->p1, $partido->p2, $partido->puntos_p1, $partido->puntos_p2, $partido->torneo_id);
+        // $this->guardarResultado($partido->p1, $partido->p2, $partido->puntos_p1, $partido->puntos_p2, $partido->torneo_id);
 
         return response()->json(['message' => 'Resultado propuesto con éxito'], 200);
     }
@@ -270,6 +284,8 @@ class PartidosController extends Controller
         $partido->estado = 2;
         
         $partido->save();
+        
+        $this->guardarResultado($partido->p1, $partido->p2, $partido->puntos_p1, $partido->puntos_p2, $partido->torneo_id);
     }
 
     public function rechazarResultado($p)

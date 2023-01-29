@@ -82,7 +82,7 @@ class TorneoController extends Controller
 
             $valid = $this->checkInscripcion($request->pareja, $torneo->id);
             if (!$valid) {
-                return response()->json(['message' => 'Algún integrante de la pareja ya se encuentra inscrito en el torneo'], 500);
+                return response()->json(['message' => 'Esto se debe a que, o bien la pareja, o uno de sus integrantes, ya se encuentran inscritos en la competición'], 500);
             }
 
             if (Inscripcion::where('pareja_id', $request->pareja)->where('torneo_id', $torneo->id)->first() != null) {
@@ -308,7 +308,7 @@ class TorneoController extends Controller
     {
 
         $torneo = Torneo::findOrFail($request->torneo);
-        $inscripciones = Inscripcion::where('torneo_id', $torneo->id)->pluck('pareja_id');
+        $inscripciones = Inscripcion::where('torneo_id', $torneo->id)->where('validated', 1)->pluck('pareja_id');
 
         if (count($inscripciones) < 2) return false;
         if (count($inscripciones) % 2 == 1) $inscripciones[] = 'blank'; // if number of inscripciones is even, add a dummy team that means 'this team don't play this round'
@@ -373,10 +373,11 @@ class TorneoController extends Controller
 
         $fecha_inicio = date('Y-m-d 00:00', strtotime($request->fecha_inicio));
         $fecha_fin = date('Y-m-d 23:59', strtotime($request->fecha_fin));
-        $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
-
+        
         $todos_horarios = true;
         $jornada_completa = false;
+        
+        $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
         if (count($partidos) == 0) {
             $jornada_completa = true;
             return response()->json(['message' => 'Jornada completa', 'jornada' => $jornada_completa, 'horarios' => $todos_horarios], 200);
@@ -385,7 +386,11 @@ class TorneoController extends Controller
         $this->asignarHorariosPreferencias($partidos, $canchas, $fecha_inicio, $fecha_fin);
 
         $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
-        
+        if (count($partidos) == 0) {
+            $jornada_completa = true;
+            return response()->json(['message' => 'Horarios asignados', 'jornada' => $jornada_completa, 'horarios' => $todos_horarios]);
+        }
+
         $this->asignarHorariosPreferenciasParcial($partidos, $canchas, $fecha_inicio, $fecha_fin);
 
         $partidos = Partido::where('jornada_id', $request->jornada)->whereNull('horario_id')->inRandomOrder()->get();
@@ -393,6 +398,7 @@ class TorneoController extends Controller
             $jornada_completa = true;
             return response()->json(['message' => 'Horarios asignados', 'jornada' => $jornada_completa, 'horarios' => $todos_horarios]);
         }
+
         foreach ($partidos as $partido) {
             $horario = Horario::whereIn('id_cancha', $canchas)->where('ocupado', 0)->where('inicio', '>=', $fecha_inicio)->where('inicio', '<=', $fecha_fin)->inRandomOrder()->first();
             if ($horario != null) {
@@ -439,6 +445,7 @@ class TorneoController extends Controller
                         foreach ($preferencias2 as $preferencia) {
                             if ($preferencia->$dia == 1) {
                                 if ($preferencia->todo_dia == 1) {
+                                    // Este horario cuadra con el dia y la hora para la pareja 2 y, por lo tanto, para ambas
                                     $partido->horario_id = $horario->id;
                                     $partido->save();
                                     $horario->ocupado = 1;

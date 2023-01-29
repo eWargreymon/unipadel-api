@@ -51,6 +51,7 @@ Route::post('proponerHorarioPartido', [PartidosController::class, 'proponerHorar
 Route::get('aceptarPropuesta/{partido}', [PartidosController::class, 'aceptarPropuesta']);
 Route::get('rechazarPropuesta/{partido}', [PartidosController::class, 'rechazarPropuesta']);
 
+Route::post('asignarResultadoPartido', [PartidosController::class, 'asignarResultadoPartido']);
 Route::post('proponerResultadoPartido', [PartidosController::class, 'proponerResultadoPartido']);
 Route::get('aceptarResultado/{partido}', [PartidosController::class, 'aceptarResultado']);
 Route::get('rechazarResultado/{partido}', [PartidosController::class, 'rechazarResultado']);
